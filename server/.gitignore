@@ -1,0 +1,4 @@
+virtual/
+
+*.pyc
+registration_form/db.sqlite3

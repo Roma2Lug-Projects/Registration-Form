@@ -1,0 +1,3 @@
+export SERV_PATH="."
+export VIRT_ENV="$SERV_PATH/virtual"
+export DJANGO_PROJ="$SERV_PATH/registration_form"
