@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+
+{% load staticfiles %}
+
+<head>
+	<title>Registration Form</title>
+	<style>
+		.center {
+			text-align: center;
+		}
+	</style>
+	<META HTTP-EQUIV="refresh" CONTENT="5;URL={% url 'index' %}">
+</head>
+
+<body>
+	<div class="center">
+		<img src="{% static 'portal/Logo.png' %}" alt="Roma2LUG" />
+		<h1>Linux Day 2014</h1>
+		<h3>
+			Attenzione: l'email usata sembra essere gi&agrave; presente nel nostro sistema.<br />
+			<a href={% url 'index' %}>Tornare indietro</a> e riprovare con un altro indirizzo.
+		</h3>
+	</div>
+</body>
+
+</html>

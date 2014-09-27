@@ -2,3 +2,5 @@ virtual/
 
 *.pyc
 registration_form/db.sqlite3
+registration_form/secret_key.txt
+registration_form/registration_form/local_settings.py

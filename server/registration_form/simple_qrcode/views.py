@@ -5,9 +5,6 @@ import qrcode.image.svg
 from qrcode.image.pure import PymagingImage
 
 # Create your views here.
-def index(request):
-	return render(request, 'simple_qrcode/index.html')
-
 def qrview(request, qr_id):
 	return render(request, 'simple_qrcode/show.html', {'qr_id': qr_id})
 
