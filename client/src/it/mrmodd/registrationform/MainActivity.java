@@ -1,6 +1,7 @@
 package it.mrmodd.registrationform;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,6 +12,11 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		// Display the fragment as the main content.
+        getFragmentManager().beginTransaction()
+        	.replace(R.id.activity_main_container, new MainFragment())
+        	.commit();
 	}
 
 	@Override
@@ -27,6 +33,7 @@ public class MainActivity extends Activity {
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
+			startActivity(new Intent(this, ActivitySettings.class));
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

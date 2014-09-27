@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Accettazione iscrizioni</string>
+    <string name="action_settings">Impostazioni</string>
+    
+    <!-- MainFragment -->
+    <string name="text_currentID">ID corrente: </string>
+    <string name="button_qrcode">Scansiona QR Code</string>
+    <string name="button_id">Trova ID</string>
+    <string name="button_name">Trova nome</string>
+    <string name="button_accept">Registra</string>
+    <string name="button_cancel">Rimuovi</string>
+    
+    <!-- Preferences -->
+    <string name="pref_server_url">URL del server REST</string>
+    <string name="pref__username">Utente</string>
+    <string name="pref_password">Password</string>
+
+</resources>

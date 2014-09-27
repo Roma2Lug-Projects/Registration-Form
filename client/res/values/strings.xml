@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Registration Form</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="app_name">Registration acceptance</string>
     <string name="action_settings">Settings</string>
+    
+    <!-- MainFragment -->
+    <string name="text_currentID">Current ID: </string>
+    <string name="button_qrcode">Scan QR Code</string>
+    <string name="button_id">Find ID</string>
+    <string name="button_name">Find Name</string>
+    <string name="button_accept">Record</string>
+    <string name="button_cancel">Remove</string>
+    
+    <!-- Preferences -->
+    <string name="pref_server_url">Server REST URL</string>
+    <string name="pref__username">Server username</string>
+    <string name="pref_password">Server password</string>
 
 </resources>
