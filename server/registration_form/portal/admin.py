@@ -23,9 +23,9 @@ class ParticipantAdmin(admin.ModelAdmin):
 		'registration_date',
 		'check_in']
 	
-	list_filter = ['participate_morning', 'participate_afternoon',]
-	search_fields = ['pk', 'first_name', 'last_name', 'email',]
-	ordering = ['registration_date', 'check_in',]
+	list_filter = ['participate_morning', 'participate_afternoon', 'check_in',]
+	search_fields = ['id', 'first_name', 'last_name', 'email',]
+	ordering = ['id', 'registration_date', 'check_in',]
 
 
 admin.site.register(Participant, ParticipantAdmin)

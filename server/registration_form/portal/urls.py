@@ -8,6 +8,6 @@ urlpatterns = patterns('',
 	url(r'^$', views.index, name='index'),
 	url(r'^error/$', views.error, name='error'),
 	url(r'^rest/$', views.RESTParticipantList.as_view(), name='rest_list'),
-	url(r'^rest/(?P<pk>[0-9]+)/$', views.RESTParticipantDetail.as_view(), name='rest_detail'),
+	url(r'^rest/(?P<pk>\d+)/$', views.RESTParticipantDetail.as_view(), name='rest_detail'),
 	url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 )
