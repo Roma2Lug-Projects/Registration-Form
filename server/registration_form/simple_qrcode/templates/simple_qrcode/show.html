@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<head>
+	<title>Registration Form</title>
+	<style>
+		.center {
+			text-align: center;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="center">
+		<h1>ID: {{ qr_id }}</h1>
+		<img src="{% url 'qrpng' qr_id %}" />
+	</div>
+</body>
+
+</html>

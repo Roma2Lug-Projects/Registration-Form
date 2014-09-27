@@ -97,10 +97,28 @@ fi
 echo "OK!"
 
 # Requirements for QRCode
-echo -ne "Installing QRCode... "
+echo -ne "Installing QRCode"
 pip install qrcode >/dev/null
 if [ $? != "0" ] ; then
 	echo -e "FAILED!\n\nCannot install QRCode." >&2
+	exit 1
+fi
+echo -n "."
+pip install pillow >/dev/null
+if [ $? != "0" ] ; then
+	echo -e "FAILED!\n\nCannot install Pillow." >&2
+	exit 1
+fi
+echo -n "."
+pip install https://github.com/ojii/pymaging/archive/master.zip >/dev/null
+if [ $? != "0" ] ; then
+	echo -e "FAILED!\n\nCannot install pymaging." >&2
+	exit 1
+fi
+echo -n ". "
+pip install https://github.com/ojii/pymaging-png/archive/master.zip >/dev/null
+if [ $? != "0" ] ; then
+	echo -e "FAILED!\n\nCannot install pymaging-png." >&2
 	exit 1
 fi
 echo "OK!"

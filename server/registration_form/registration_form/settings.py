@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'portal',
+    'simple_qrcode',
     'rest_framework',
 )
 
