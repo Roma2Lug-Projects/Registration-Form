@@ -10,6 +10,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -24,10 +27,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Base64;
+import android.util.JsonWriter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -260,11 +265,11 @@ public class MainFragment extends Fragment {
 	private void writeJSON(HttpURLConnection conn, String json) throws IOException {
 		
 		conn.setRequestProperty("Content-Type", "application/json");
-		conn.setRequestProperty("Content-Length", "" + json.length());
+		conn.setRequestProperty("Content-Length", "" + json.getBytes("UTF-8").length);
 		
 		OutputStream os = conn.getOutputStream();
 		DataOutputStream dos = new DataOutputStream(os);
-		dos.writeBytes(json);
+		dos.write(json.getBytes("UTF-8"));
 		dos.flush();
 		dos.close();
 		os.close();
@@ -287,6 +292,7 @@ public class MainFragment extends Fragment {
 
 						//Parse JSON
 						currentJSON = new JSONObject(json);
+						
 						String first_name = currentJSON.getString("first_name");
 						String last_name = currentJSON.getString("last_name");
 						String email = currentJSON.getString("email");
@@ -350,8 +356,6 @@ public class MainFragment extends Fragment {
 						String date = new java.sql.Timestamp(new Date().getTime()).toString();
 						currentJSON.put("check_in", date);
 						
-						currentJSON.put("comments", null);
-						
 						writeJSON(conn, currentJSON.toString());
 						
 						if (conn.getResponseCode() == 200) {
@@ -400,8 +404,6 @@ public class MainFragment extends Fragment {
 						publishProgress(getActivity().getString(R.string.error_already_checked_out));
 					else {
 						currentJSON.put("check_in", JSONObject.NULL);
-
-						currentJSON.put("comments", null);
 						
 						writeJSON(conn, currentJSON.toString());
 						
