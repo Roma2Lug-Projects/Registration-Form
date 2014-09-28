@@ -4,11 +4,13 @@
     <EditTextPreference
         android:key="@string/pref_key_server_url"
         android:title="@string/pref_server_url"
-        android:defaultValue="http://example.com/rest/" />
+        android:defaultValue="http://example.com/rest/"
+        android:inputType="textWebEmailAddress" />
     
     <EditTextPreference
         android:key="@string/pref_key_username"
-        android:title="@string/pref_username" />
+        android:title="@string/pref_username"
+        android:inputType="textVisiblePassword|textNoSuggestions" />
     
     <EditTextPreference
         android:key="@string/pref_key_password"

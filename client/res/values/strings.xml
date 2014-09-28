@@ -17,14 +17,12 @@
     
     <string name="button_qrcode">Scan QR Code</string>
     <string name="button_id">Find ID</string>
-    <string name="button_name">Find Name</string>
     <string name="button_accept">Record</string>
     <string name="button_remove">Remove</string>
     <string name="button_cancel">Cancel</string>
     
     <!-- Toasts -->
     <string name="error_qr_content">Invalid content of the QR Code</string>
-    <string name="error_malformed_url">Invalid URL, change it on preferences and retry</string>
     <string name="error_connection">Cannot contact the server</string>
     <string name="error_internal_error">Internal error, blame the developer!</string>
     <string name="error_server_code">Server error</string>

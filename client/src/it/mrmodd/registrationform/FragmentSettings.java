@@ -1,7 +1,5 @@
 package it.mrmodd.registrationform;
 
-import java.io.File;
-
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -15,7 +13,8 @@ public class FragmentSettings extends PreferenceFragment {
 		super.onCreate(savedInstanceState);
 		
 		addPreferencesFromResource(R.xml.settings);
-
+		
+		bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_username)));
 		bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_server_url)));
 		
 	}
@@ -68,56 +67,5 @@ public class FragmentSettings extends PreferenceFragment {
 						preference.getContext()).getString(preference.getKey(),
 						""));
 	}
-	
-	/**
-	 * Obtain the dimension of a directory and all included files
-	 * @param f File descriptor of a directory
-	 * @return recursive dimension in bytes of all files contained in f
-	 */
-	public static long pathSize(File f) {
-		if (f == null || !f.exists())
-			return 0;
-		if (f.isFile())
-			return f.length();
-	    long length = 0;
-	    for (File file : f.listFiles()) {
-	        if (file.isFile())
-	            length += file.length();
-	        else
-	            length += pathSize(file);
-	    }
-	    return length;
-	}
-	
-	/**
-	 * Delete recursively a directory
-	 * @param file File descriptor of a directory
-	 */
-	public static void deleteDirectory(File file) {
-		if(file.isDirectory()){
-			//directory is empty, then delete it
-			if(file.list().length == 0){
-				file.delete();
-			} else {
-				//list all the directory contents
-				String files[] = file.list();
- 
-				for (String temp : files) {
-					//construct the file structure
-					File fileDelete = new File(file, temp);
- 
-					//recursive delete
-					deleteDirectory(fileDelete);
-				}
-				//check the directory again, if empty then delete it
-				if(file.list().length == 0){
-					file.delete();
-				}
-			}
-		} else {
-			//if file, then delete it
-			file.delete();
-		}
-	} 
 
 }

@@ -19,6 +19,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/button_qr"
+        android:layout_marginBottom="15dp"
         android:layout_marginTop="15dp"
         android:ems="10"
         android:inputType="number" />
@@ -32,28 +33,6 @@
         android:layout_toEndOf="@+id/editText_id"
         android:layout_toRightOf="@+id/editText_id"
         android:text="@string/button_id" />
-
-    <EditText
-        android:id="@+id/editText_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/editText_id"
-        android:layout_marginBottom="20dp"
-        android:layout_marginTop="15dp"
-        android:ems="10"
-        android:inputType="textPersonName" />
-
-    <Button
-        android:id="@+id/button_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/editText_name"
-        android:layout_alignBottom="@+id/editText_name"
-        android:layout_alignLeft="@+id/button_id"
-        android:layout_alignStart="@+id/button_id"
-        android:text="@string/button_name" />
 
     <LinearLayout
         android:id="@+id/linearLayout1"
@@ -90,18 +69,16 @@
 
     </LinearLayout>
 
-    
-
     <ScrollView
         android:id="@+id/scrollView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/linearLayout1"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/editText_name" >
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editText_id" >
 
         <LinearLayout
             android:layout_width="match_parent"

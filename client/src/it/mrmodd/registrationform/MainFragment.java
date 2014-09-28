@@ -7,12 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -27,12 +22,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Base64;
-import android.util.JsonWriter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -41,7 +34,6 @@ import android.widget.Toast;
 public class MainFragment extends Fragment {
 	private Button buttonQR;
 	private Button buttonID;
-	private Button buttonName;
 	private Button buttonAccept;
 	private Button buttonRemove;
 	private Button buttonCancel;
@@ -49,7 +41,6 @@ public class MainFragment extends Fragment {
 	private TextView textViewCurrentID;
 	
 	private EditText editTextID;
-	private EditText editTextName;
 	
 	private Integer currentID = 0;
 	private JSONObject currentJSON = null;
@@ -63,7 +54,6 @@ public class MainFragment extends Fragment {
 		
 		buttonQR = (Button) v.findViewById(R.id.button_qr);
 		buttonID = (Button) v.findViewById(R.id.button_id);
-		buttonName = (Button) v.findViewById(R.id.button_name);
 		buttonAccept = (Button) v.findViewById(R.id.button_accept);
 		buttonRemove = (Button) v.findViewById(R.id.button_remove);
 		buttonCancel = (Button) v.findViewById(R.id.button_cancel);
@@ -71,7 +61,6 @@ public class MainFragment extends Fragment {
 		textViewCurrentID = (TextView) v.findViewById(R.id.text_currentID);
 		
 		editTextID = (EditText) v.findViewById(R.id.editText_id);
-		editTextName = (EditText) v.findViewById(R.id.editText_name);
 		
 		buttonQR.setOnClickListener(new OnClickListener() {
 
@@ -114,25 +103,12 @@ public class MainFragment extends Fragment {
 				}
 				
 				editTextID.setText("");
-				editTextName.setText("");
 				
 				cleanScreen();
 				
 				currentID = Integer.parseInt(id);
         		new RetrieveDetails().execute();
 				
-			}
-			
-		});
-		
-		buttonName.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				
-				cleanScreen();
-
-				//TODO
 			}
 			
 		});
@@ -208,10 +184,9 @@ public class MainFragment extends Fragment {
 		currentJSON = null;
 		textViewCurrentID.setText(R.string.text_empty);
 		editTextID.setText("");
-		editTextName.setText("");
 	}
 	
-	private HttpURLConnection enstablishConnection(String method, String file) {
+	private HttpURLConnection enstablishConnection(String method, String file) throws IOException {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		
 		String url_pref = pref.getString(getActivity().getString(R.string.pref_key_server_url), "");
@@ -219,31 +194,18 @@ public class MainFragment extends Fragment {
 								+ ":"
 								+ pref.getString(getActivity().getString(R.string.pref_key_password), "");
 		URL url;
-		HttpURLConnection connection = null;
+		HttpURLConnection connection;
 		
-		try {
-			url = new URL(url_pref + file);
-			
-			connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod(method);
-			
-			if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT"))
-				connection.setDoOutput(true);
-			connection.setDoInput(true);
-			
-			connection.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT));
-			
-		} catch (MalformedURLException e) {
-			Toast.makeText(getActivity(), R.string.error_malformed_url, Toast.LENGTH_SHORT).show();
-			return null;
-		} catch (ProtocolException e) {
-			Toast.makeText(getActivity(), R.string.error_internal_error, Toast.LENGTH_SHORT).show();
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			Toast.makeText(getActivity(), R.string.error_connection, Toast.LENGTH_SHORT).show();
-			return null;
-		}
+		url = new URL(url_pref + file);
+		
+		connection = (HttpURLConnection) url.openConnection();
+		connection.setRequestMethod(method);
+		
+		if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT"))
+			connection.setDoOutput(true);
+		connection.setDoInput(true);
+		
+		connection.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT));
 		
 		return connection;
 	}
@@ -282,47 +244,48 @@ public class MainFragment extends Fragment {
 		protected String doInBackground(Void... params) {
 			String newtext = null;
 			
-			HttpURLConnection conn = enstablishConnection("GET", currentID.toString() + "/");
-			if (conn != null) {
+			HttpURLConnection conn = null;
+			try {
+				conn = enstablishConnection("GET", currentID.toString() + "/");
 				
-				try {
-					if (conn.getResponseCode() == 200) {
+				if (conn.getResponseCode() == 200) {
 					
-						String json = fetchJSON(conn);
+					String json = fetchJSON(conn);
 
-						//Parse JSON
-						currentJSON = new JSONObject(json);
-						
-						String first_name = currentJSON.getString("first_name");
-						String last_name = currentJSON.getString("last_name");
-						String email = currentJSON.getString("email");
-						Boolean morning = currentJSON.getBoolean("participate_morning");
-						Boolean afternoon = currentJSON.getBoolean("participate_afternoon");
-						String checkin = (!currentJSON.getString("check_in").matches("null")) ? currentJSON.getString("check_in") : "--";
-						String comments = currentJSON.getString("comments");
-
-						newtext = getActivity().getString(R.string.text_currentID) + " " + currentID.toString() + "\n";
-						newtext += getActivity().getString(R.string.text_name) + " " + first_name + "\n";
-						newtext += getActivity().getString(R.string.text_lastname) + " " + last_name + "\n";
-						newtext += getActivity().getString(R.string.text_email) + " " + email + "\n";
-						newtext += getActivity().getString(R.string.text_morning) + " " + morning + "\n";
-						newtext += getActivity().getString(R.string.text_afternoon) + " " + afternoon + "\n";
-						newtext += getActivity().getString(R.string.text_check_in) + " " + checkin + "\n\n";
-						newtext += getActivity().getString(R.string.text_comments) + "\n" + comments;
-			            
-					}
-					else {
-						publishProgress(getActivity().getString(R.string.error_server_code) + "\n" + conn.getResponseCode() + ": " + conn.getResponseMessage());
-					}
+					//Parse JSON
+					currentJSON = new JSONObject(json);
 					
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (JSONException e) {
-					publishProgress(getActivity().getString(R.string.error_invalid_response));
-				} finally {
-					conn.disconnect();
+					String first_name = currentJSON.getString("first_name");
+					String last_name = currentJSON.getString("last_name");
+					String email = currentJSON.getString("email");
+					Boolean morning = currentJSON.getBoolean("participate_morning");
+					Boolean afternoon = currentJSON.getBoolean("participate_afternoon");
+					String checkin = (!currentJSON.getString("check_in").matches("null")) ? currentJSON.getString("check_in") : "--";
+					String comments = currentJSON.getString("comments");
+
+					newtext = getActivity().getString(R.string.text_currentID) + " " + currentID.toString() + "\n";
+					newtext += getActivity().getString(R.string.text_name) + " " + first_name + "\n";
+					newtext += getActivity().getString(R.string.text_lastname) + " " + last_name + "\n";
+					newtext += getActivity().getString(R.string.text_email) + " " + email + "\n";
+					newtext += getActivity().getString(R.string.text_morning) + " " + morning + "\n";
+					newtext += getActivity().getString(R.string.text_afternoon) + " " + afternoon + "\n";
+					newtext += getActivity().getString(R.string.text_check_in) + " " + checkin + "\n\n";
+					newtext += getActivity().getString(R.string.text_comments) + "\n" + comments;
+		            
+				}
+				else {
+					publishProgress(getActivity().getString(R.string.error_server_code) + "\n" + conn.getResponseCode() + ": " + conn.getResponseMessage());
 				}
 				
+			} catch (IOException | IllegalArgumentException e) {
+				publishProgress(getActivity().getString(R.string.error_connection));
+				e.printStackTrace();
+			} catch (JSONException e) {
+				publishProgress(getActivity().getString(R.string.error_invalid_response));
+				e.printStackTrace();
+			} finally {
+				if (conn != null)
+					conn.disconnect();
 			}
 			
 			return newtext;
@@ -345,11 +308,11 @@ public class MainFragment extends Fragment {
 		@Override
 		protected Void doInBackground(Void... params) {
 			
-			HttpURLConnection conn = enstablishConnection("PUT", currentID.toString() + "/");
-			if (conn != null && currentJSON != null) {
+			HttpURLConnection conn = null;
+			try {
+				conn = enstablishConnection("PUT", currentID.toString() + "/");
 				
-				try {
-					
+				if (currentJSON != null) {
 					if (!currentJSON.getString("check_in").matches("null"))
 						publishProgress(getActivity().getString(R.string.error_already_checked_in));
 					else {
@@ -365,15 +328,16 @@ public class MainFragment extends Fragment {
 						else
 							publishProgress(getActivity().getString(R.string.error_server_code) + "\n" + conn.getResponseCode() + ": " + conn.getResponseMessage());
 					}
-					
-				} catch (JSONException e) {
-					publishProgress(getActivity().getString(R.string.error_internal_error));
-				} catch (IOException e) {
-					e.printStackTrace();
-				} finally {
-					conn.disconnect();
 				}
 				
+			} catch (IOException | IllegalArgumentException e) {
+				publishProgress(getActivity().getString(R.string.error_connection));
+				e.printStackTrace();
+			} catch (JSONException e) {
+				publishProgress(getActivity().getString(R.string.error_internal_error));
+				e.printStackTrace();
+			} finally {
+				conn.disconnect();
 			}
 			
 			return null;
@@ -395,10 +359,11 @@ public class MainFragment extends Fragment {
 		@Override
 		protected Void doInBackground(Void... params) {
 			
-			HttpURLConnection conn = enstablishConnection("PUT", currentID.toString() + "/");
-			if (conn != null && currentJSON != null) {
+			HttpURLConnection conn = null;
+			try {
+				conn = enstablishConnection("PUT", currentID.toString() + "/");
 				
-				try {
+				if (currentJSON != null) {
 					
 					if (currentJSON.getString("check_in").matches("null"))
 						publishProgress(getActivity().getString(R.string.error_already_checked_out));
@@ -415,14 +380,16 @@ public class MainFragment extends Fragment {
 							publishProgress(getActivity().getString(R.string.error_server_code) + "\n" + conn.getResponseCode() + ": " + conn.getResponseMessage());
 					}
 					
-				} catch (JSONException e) {
-					publishProgress(getActivity().getString(R.string.error_internal_error));
-				} catch (IOException e) {
-					e.printStackTrace();
-				} finally {
-					conn.disconnect();
 				}
 				
+			} catch (IOException | IllegalArgumentException e) {
+				publishProgress(getActivity().getString(R.string.error_connection));
+				e.printStackTrace();
+			} catch (JSONException e) {
+				publishProgress(getActivity().getString(R.string.error_internal_error));
+				e.printStackTrace();
+			} finally {
+				conn.disconnect();
 			}
 			
 			return null;
