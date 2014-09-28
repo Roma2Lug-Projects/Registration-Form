@@ -8,7 +8,7 @@
     
     <EditTextPreference
         android:key="@string/pref_key_username"
-        android:title="@string/pref__username" />
+        android:title="@string/pref_username" />
     
     <EditTextPreference
         android:key="@string/pref_key_password"

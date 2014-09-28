@@ -5,16 +5,39 @@
     <string name="action_settings">Impostazioni</string>
     
     <!-- MainFragment -->
-    <string name="text_currentID">ID corrente: </string>
+    <string name="text_empty">In attesa di un ID&#8230;</string>
+    <string name="text_currentID">ID:</string>
+    <string name="text_name">Nome:</string>
+    <string name="text_lastname">Cognome:</string>
+    <string name="text_email">Email:</string>
+    <string name="text_morning">Mattina:</string>
+    <string name="text_afternoon">Pomeriggio:</string>
+    <string name="text_check_in">Check in:</string>
+    <string name="text_comments">Commenti:</string>
+    
     <string name="button_qrcode">Scansiona QR Code</string>
     <string name="button_id">Trova ID</string>
     <string name="button_name">Trova nome</string>
     <string name="button_accept">Registra</string>
-    <string name="button_cancel">Rimuovi</string>
+    <string name="button_remove">Rimuovi</string>
+    <string name="button_cancel">Annulla</string>
+    
+    <!-- Toasts -->
+    <string name="error_qr_content">Contenuto del QR Code non valido</string>
+    <string name="error_malformed_url">URL non valido, cambiarlo nelle preferenze e riprovare</string>
+    <string name="error_connection">Impossibile contattare il server</string>
+    <string name="error_internal_error">Errore interno, dai la colpa allo sviluppatore!</string>
+    <string name="error_server_code">Errore del server</string>
+    <string name="error_invalid_response">Risposta non valida dal server</string>
+    <string name="error_empty_field">Campo vuoto</string>
+    <string name="error_invalid_field">Campo non valido</string>
+    <string name="error_no_id_selected">Selezionare prima un ID</string>
+    <string name="error_already_checked_in">Utente già acceduto</string>
+    <string name="error_already_checked_out">Utente non ancora acceduto</string>
     
     <!-- Preferences -->
     <string name="pref_server_url">URL del server REST</string>
-    <string name="pref__username">Utente</string>
+    <string name="pref_username">Utente</string>
     <string name="pref_password">Password</string>
 
 </resources>
