@@ -1,12 +1,19 @@
 #!/bin/bash
 
+source ./environment 2>/dev/null
+if [ $? != "0" ] ; then
+	echo -e "Cannot import environment path" >&2
+	exit 1
+fi
+
 read -p "Are you sure you want to clean the server installation? This will erase all data! [y|N] " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-	rm -rf virtual/
-	rm -rf registration_form/db.sqlite3
-	find ./registration_form -name "*.pyc" -exec rm -rf {} \;
+	rm -rf $VIRT_ENV/
+	rm -rf $DJANGO_PROJ/db.sqlite3
+	rm -rf $DJANGO_PROJ/secret_key.txt
+	find $DJANGO_PROJ -name "*.pyc" -exec rm -rf {} \;
 else
 	echo "Aborted."
 fi
