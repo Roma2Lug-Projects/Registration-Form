@@ -1,3 +1,8 @@
+# ------------------------------------------------------------------ #
+# Copyright (C) 2014 Federico "MrModd" Cosentino (http://mrmodd.it/) #
+# on behalf of Roma2LUG (http://lug.uniroma2.it/)                    #
+# ------------------------------------------------------------------ #
+
 from django.db import models
 
 # Create your models here.

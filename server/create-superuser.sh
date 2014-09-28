@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# ------------------------------------------------------------------- #
+# Copyright (C) 2014 Federico "MrModd" Cosentino (http://mrmodd.it/) #
+# on behalf of Roma2LUG (http://lug.uniroma2.it/)                     #
+# ------------------------------------------------------------------- #
+
 source ./environment 2>/dev/null
 if [ $? != "0" ] ; then
 	echo -e "Cannot import environment path" >&2

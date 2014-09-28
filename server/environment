@@ -1,3 +1,8 @@
+# ------------------------------------------------------------------- #
+# Copyright (C) 2014 Federico "MrModd" Cosentino (http://mrmodd.it/) #
+# on behalf of Roma2LUG (http://lug.uniroma2.it/)                     #
+# ------------------------------------------------------------------- #
+
 export SERV_PATH="."
 export VIRT_ENV="$SERV_PATH/virtual"
 export DJANGO_PROJ="$SERV_PATH/registration_form"
