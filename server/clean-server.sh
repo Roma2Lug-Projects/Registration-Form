@@ -5,7 +5,9 @@
 # on behalf of Roma2LUG (http://lug.uniroma2.it/)                     #
 # ------------------------------------------------------------------- #
 
-source ./environment 2>/dev/null
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source $DIR/environment 2>/dev/null
 if [ $? != "0" ] ; then
 	echo -e "Cannot import environment path" >&2
 	exit 1

@@ -5,9 +5,6 @@
 # on behalf of Roma2LUG (http://lug.uniroma2.it/)                     #
 # ------------------------------------------------------------------- #
 
-ADDRESS="0.0.0.0"
-PORT="8000"
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source $DIR/environment 2>/dev/null
@@ -22,4 +19,4 @@ if [ $? != "0" ] ; then
 	exit 1
 fi
 
-python $DJANGO_PROJ/manage.py runserver $ADDRESS:$PORT
+python $DJANGO_PROJ/manage.py collectstatic

@@ -3,6 +3,8 @@
 # on behalf of Roma2LUG (http://lug.uniroma2.it/)                     #
 # ------------------------------------------------------------------- #
 
-export SERV_PATH="."
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+export SERV_PATH=$DIR
 export VIRT_ENV="$SERV_PATH/virtual"
 export DJANGO_PROJ="$SERV_PATH/registration_form"
