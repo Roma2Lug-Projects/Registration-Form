@@ -113,7 +113,7 @@ fi
 echo -n "."
 pip install pillow >/dev/null
 if [ $? != "0" ] ; then
-	echo -e "FAILED!\n\nCannot install Pillow." >&2
+	echo -e "FAILED!\n\nCannot install Pillow. You need python-dev and python-setuptools packages." >&2
 	exit 1
 fi
 echo -n "."

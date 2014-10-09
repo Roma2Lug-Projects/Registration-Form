@@ -76,6 +76,87 @@ If the server URL is http://example.com:8080/, these URLs are available:
   SMTP server credentials, used to send emails. This is not present by default, you
   should copy the local_settings.py.example and edit the required fields
 
+### Installation guide with Apache
+
+- You need to install Apache server (but not an entire LAMP server). On Ubuntu or Debian
+  install apache2 and libapache2-mod-wsgi:
+
+		~# apt-get install apache2 libapache2-mod-wsgi
+
+- Now you need Python virtualenv and pip:
+
+		~# apt-get install python-virtualenv python-pip
+
+- Some Python packages also require python-dev and python-setuptools:
+
+		~# apt-get install python-dev python-setuptools
+
+- Move *server/registration_form/registration_form/local_settings.py.example* in
+  *server/registration_form/registration_form/local_settings.py*:
+
+		~$ mv server/registration_form/registration_form/local_settings.py.example\
+		~$ server/registration_form/registration_form/local_settings.py
+
+- Modify this file with your data. Next steps assume you DIDN'T modify *STATIC_ROOT* and
+  *STATIC_URL* variables
+- Copy *server/registration_form* in */var/www/*:
+
+		~# cp -r server/registration_form /var/www
+
+- Edit file *server/environment* and change *SERV_PATH* from *"."* to *"/var/www"*
+- Build virtual environment executing script *server/create-environment.sh*
+  Now you should see a new *virtual* folder in */var/www/*
+- Create a new folder in */var/www/* called *static*:
+
+		~# mkdir /var/www/static
+
+- Populate the static folder with files collected from Django. Use
+  *server/update-static.sh* script to do the magic:
+
+		~# server/update-static.sh
+
+- Keep in mind these paths you should have:
+- - */var/www/static/*
+- - */var/www/registration_form/registration_form/wsgi.py*
+- - */var/www/virtual/lib/python2.7/site-packages/*
+- Now we need to edit Apache sites configuration file:
+- - In */etc/apache2/sites-enabled/* folder you should have a symbolic link called
+    *000-default.conf* or similar
+- - Open it and find *<VirtualHost *:80>* section
+- - Remove all the content and add next lines:
+
+```
+#!bash
+
+		WSGIScriptAlias / /var/www/registration_form/registration_form/wsgi.py
+		WSGIDaemonProcess localhost python-path=/var/www/registration_form:/var/www/virtual/lib/python2.7/site-packages
+		WSGIProcessGroup localhost
+		
+		Alias /static/ /var/www/static/
+		
+		<Directory /var/www/static>
+			Require all granted
+		</Directory>
+		
+		<Directory /var/www/registration_form/registration_form>
+			<Files wsgi.py>
+				Require all granted
+			</Files>
+		</Directory>
+```
+
+- - Remember to change */var/www/static* path if you changed it in *local_settings.py* file
+
+- Finally give correct permissions to the folder:
+
+		~# chown -R www-data:www-data /var/www/
+
+- And restart the server:
+
+		~# service apache2 restart
+
+- Now you should navigate typing http://localhost/
+
 ## Client
 
 *client* folder is an Eclipse project. It is compiled for Android SDK version from 14
@@ -90,3 +171,6 @@ You need to have the QR Code scanner on the phone, otherwise this app will promp
 to install it.
 You can fetch a participant details scanning its QR Code or typing his ID manually.
 When you can see his details on the app you can procede to check in his presence.
+
+
+
