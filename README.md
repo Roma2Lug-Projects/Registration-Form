@@ -104,8 +104,11 @@ If the server URL is http://example.com:8080/, these URLs are available:
 		~# cp -r server/registration_form /var/www
 
 - Edit file *server/environment* and change *SERV_PATH* from *"."* to *"/var/www"*
-- Build virtual environment executing script *server/create-environment.sh*
-  Now you should see a new *virtual* folder in */var/www/*
+- Build virtual environment executing script *server/create-environment.sh*, afterward you
+  should see a new *virtual* folder in */var/www/*:
+
+		~# server/create-environment.sh
+
 - Create a new folder in */var/www/* called *static*:
 
 		~# mkdir /var/www/static
@@ -131,7 +134,9 @@ If the server URL is http://example.com:8080/, these URLs are available:
 		WSGIScriptAlias / /var/www/registration_form/registration_form/wsgi.py
 		WSGIDaemonProcess localhost python-path=/var/www/registration_form:/var/www/virtual/lib/python2.7/site-packages
 		WSGIProcessGroup localhost
-		
+
+		WSGIPassAuthorization On
+
 		Alias /static/ /var/www/static/
 		
 		<Directory /var/www/static>
