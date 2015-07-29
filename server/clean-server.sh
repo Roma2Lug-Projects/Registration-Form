@@ -7,7 +7,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source $DIR/environment 2>/dev/null
+source $DIR/environment 2> /dev/null
 if [ $? != "0" ] ; then
 	echo -e "Cannot import environment path" >&2
 	exit 1
@@ -20,7 +20,7 @@ then
 	rm -rf $VIRT_ENV/
 	rm -rf $DJANGO_PROJ/db.sqlite3
 	rm -rf $DJANGO_PROJ/secret_key.txt
-	find $DJANGO_PROJ -name "*.pyc" -exec rm -rf {} \;
+	find $DJANGO_PROJ -type d -name "__pycache__" -exec rm -rf {} \; 2> /dev/null
 else
 	echo "Aborted."
 fi

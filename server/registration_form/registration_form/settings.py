@@ -13,8 +13,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
-
-from local_settings import *
+# Changes in Python3 http://stackoverflow.com/questions/12172791/changes-in-import-statement-python3
+from .local_settings import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
@@ -33,7 +33,9 @@ except IOError:
 		from django.utils.crypto import get_random_string
 		chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
 		SECRET_KEY = get_random_string(50, chars)
-		secret = file(SECRET_FILE, 'w')
+		# file() does not exist anymore in Python3
+		# http://stackoverflow.com/questions/16736833/python-nameerror-name-file-is-not-defined
+		secret = open(SECRET_FILE, 'w')
 		secret.write(SECRET_KEY)
 		secret.close()
 	except IOError:
