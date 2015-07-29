@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# ------------------------------------------------------------------- #
-# Copyright (C) 2014 Federico "MrModd" Cosentino (http://mrmodd.it/) #
-# on behalf of Roma2LUG (http://lug.uniroma2.it/)                     #
-# ------------------------------------------------------------------- #
+# ----------------------------------------------------------------------- #
+# Copyright (C) 2014-2015 Federico "MrModd" Cosentino (http://mrmodd.it/) #
+# on behalf of Roma2LUG (http://lug.uniroma2.it/)                         #
+# ----------------------------------------------------------------------- #
 
 ADDRESS="0.0.0.0"
 PORT="8000"

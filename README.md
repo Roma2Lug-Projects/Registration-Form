@@ -2,7 +2,7 @@
 
 ---------------------------------------------------------------------
 
-Copyright (C) 2014 Federico "MrModd" Cosentino (http://mrmodd.it/)
+Copyright (C) 2014-2015 Federico "MrModd" Cosentino (http://mrmodd.it/)
 on behalf of Roma2LUG (http://lug.uniroma2.it/)
 
 This program is free software: you can redistribute it and/or modify
