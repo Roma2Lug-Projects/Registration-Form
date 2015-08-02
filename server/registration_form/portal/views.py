@@ -8,6 +8,10 @@ from django import forms
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
+import threading
+from syslog import syslog as print
+from django.conf import settings
+
 # REST
 from rest_framework import generics
 from rest_framework import permissions
@@ -24,6 +28,8 @@ from io import BytesIO
 from django.db import IntegrityError
 from portal.models import Participant
 from portal.serializers import ParticipantSerializer
+
+DISABLE_EMAIL = settings.DEBUG
 
 
 
@@ -104,7 +110,11 @@ def index(request):
 				return HttpResponseRedirect(reverse('error'))
 			
 			# Send the email
-			send_email(p)
+			if not DISABLE_EMAIL:
+				t = threading.Thread(target=send_email, args=(p,))
+				t.start()
+			else:
+				print('Email disabled! No mail was sent to new registered user "' + form.cleaned_data['first_name'] + '".')
 			
 			#return HttpResponseRedirect(reverse('result', args=(p.pk,)))
 			reg_id = p.pk
