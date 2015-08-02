@@ -18,7 +18,8 @@ from rest_framework import generics
 from rest_framework import permissions
 
 # Email
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
+from email.mime.image import MIMEImage
 
 # QR Code
 import qrcode
@@ -44,17 +45,19 @@ PARTICIPATIONS = [
 
 
 
-# Support functions
+# Support functions and classes
 
 def generateSerial():
 	chars = '0123456789abcdefghijklmnopqrstuvwxyz'
 	return get_random_string(16, chars)
 
-
-
-# Views
-
 def send_email(participant):
+	# Generate QRCode
+	img = qrcode.make(participant.participant_id, image_factory=PymagingImage)
+	img_stream = BytesIO()
+	img.save(img_stream, 'PNG')
+	
+	# Compose email
 	subject = 'ID registrazione Linux Day Roma 2014'
 	from_email = 'Roma2LUG <roma2lug@gmail.com>'
 	
@@ -65,19 +68,28 @@ def send_email(participant):
 	text += '25 Ottobre 2014\n'
 	text += 'Facolta\' di Ingegneria, Universita\' Tor Vergata\n'
 	text += 'Via del Politecnico 1, edificio della Didattica.\n'
-	text += 'ID registrazione: ' + str(participant.pk)
-	text += '\n\nA presto,\nRoma2LUG\n'
+	text += 'ID registrazione: ' + str(participant.participant_id) + '\n\n'
+	text += 'A presto,\nRoma2LUG.\n'
 	
-	img = qrcode.make(participant.pk, image_factory=PymagingImage)
-	img_stream = BytesIO()
-	img.save(img_stream, 'PNG')
+	html = '<p>Caro ' + participant.first_name + ',<br />\n'
+	html += 'grazie per esserti iscritto al nostro Linux Day.<br />\n'
+	html += 'Ti preghiamo di conservare questa email come promemoria e di presentarla all\'ingresso.</p>\n'
+	html += '<p>Linux Day Roma<br />\n'
+	html += '25 Ottobre 2014<br />\n'
+	html += 'Facolta\' di Ingegneria, Universita\' Tor Vergata<br />\n'
+	html += 'Via del Politecnico 1, edificio della Didattica.<br /></p>\n'
+	html += '<p>ID registrazione: <b>' + str(participant.participant_id) + '</b><br />\n'
+	html += '<img src="cid:qrcode"></p>\n'
+	html += '<p>A presto,<br />Roma2LUG.</p>\n'
 	
-	mail = EmailMessage(subject, text, from_email, [participant.email])
-	mail.attach('qrcode_id.png', img_stream.getvalue(), 'image/png')
+	# Add content to email
+	mail = EmailMultiAlternatives(subject, text, from_email, [participant.email])
+	mail.attach_alternative(html, 'text/html')
+	image = MIMEImage(img_stream.getvalue(), 'png')
+	image.add_header('Content-ID', '<qrcode>') # This is the ID used in tag <img> for HTML part of the email
+	mail.attach(image)
 	
 	mail.send(fail_silently=True)
-
-
 
 class RegistrationForm(forms.Form):
 	
@@ -88,6 +100,8 @@ class RegistrationForm(forms.Form):
 	comments = forms.CharField(label='Commenti', max_length=512, widget=forms.Textarea, required=False)
 
 
+
+# Views
 
 def index(request):
 	# if this is a POST request we need to process the form data
