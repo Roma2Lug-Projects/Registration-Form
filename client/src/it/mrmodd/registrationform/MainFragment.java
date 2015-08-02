@@ -37,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainFragment extends Fragment {
+	public static final String SERIAL_PATTERN = "[a-z0-9]{16}";
 	private Button buttonQR;
 	private Button buttonID;
 	private Button buttonAccept;
@@ -47,7 +48,7 @@ public class MainFragment extends Fragment {
 	
 	private EditText editTextID;
 	
-	private Integer currentID = 0;
+	private String currentID = "";
 	private JSONObject currentJSON = null;
 	
 	
@@ -102,7 +103,7 @@ public class MainFragment extends Fragment {
 					Toast.makeText(getActivity(), R.string.error_empty_field, Toast.LENGTH_SHORT).show();
 					return;
 				}
-				if (!id.matches("[0-9]+")) {
+				if (!id.matches(SERIAL_PATTERN)) {
 					Toast.makeText(getActivity(), R.string.error_invalid_field, Toast.LENGTH_SHORT).show();
 					return;
 				}
@@ -111,7 +112,7 @@ public class MainFragment extends Fragment {
 				
 				cleanScreen();
 				
-				currentID = Integer.parseInt(id);
+				currentID = id;
         		new RetrieveDetails().execute();
 				
 			}
@@ -123,7 +124,7 @@ public class MainFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				
-				if (currentID == 0) {
+				if (currentID.length() == 0) {
 					Toast.makeText(getActivity(), R.string.error_no_id_selected, Toast.LENGTH_SHORT).show();
 					return;
 				}
@@ -138,7 +139,7 @@ public class MainFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				
-				if (currentID == 0) {
+				if (currentID.length() == 0) {
 					Toast.makeText(getActivity(), R.string.error_no_id_selected, Toast.LENGTH_SHORT).show();
 					return;
 				}
@@ -169,9 +170,9 @@ public class MainFragment extends Fragment {
 
 	        if (resultCode == Activity.RESULT_OK) {
 	        	String qr = data.getStringExtra("SCAN_RESULT");
-	        	if (qr.matches("[0-9]+")) {
+	        	if (qr.matches(SERIAL_PATTERN)) {
 	        		
-	        		currentID = Integer.parseInt(qr);
+	        		currentID = qr;
 	        		new RetrieveDetails().execute();
 	        		
 	        	}
@@ -179,13 +180,13 @@ public class MainFragment extends Fragment {
 	        		Toast.makeText(getActivity(), R.string.error_qr_content, Toast.LENGTH_SHORT).show();
 	        }
 	        if(resultCode == Activity.RESULT_CANCELED){
-	            //handle cancel
+	            // There's nothing to do
 	        }
 	    }
 	}
 	
 	private void cleanScreen() {
-		currentID = 0;
+		currentID = "";
 		currentJSON = null;
 		textViewCurrentID.setText(R.string.text_empty);
 		editTextID.setText("");
@@ -251,7 +252,7 @@ public class MainFragment extends Fragment {
 			
 			HttpURLConnection conn = null;
 			try {
-				conn = enstablishConnection("GET", currentID.toString() + "/");
+				conn = enstablishConnection("GET", currentID + "/");
 				
 				if (conn.getResponseCode() == 200) {
 					
@@ -268,7 +269,7 @@ public class MainFragment extends Fragment {
 					String checkin = (!currentJSON.getString("check_in").matches("null")) ? currentJSON.getString("check_in") : "--";
 					String comments = currentJSON.getString("comments");
 
-					newtext = getActivity().getString(R.string.text_currentID) + " " + currentID.toString() + "\n";
+					newtext = getActivity().getString(R.string.text_currentID) + " " + currentID + "\n";
 					newtext += getActivity().getString(R.string.text_name) + " " + first_name + "\n";
 					newtext += getActivity().getString(R.string.text_lastname) + " " + last_name + "\n";
 					newtext += getActivity().getString(R.string.text_email) + " " + email + "\n";

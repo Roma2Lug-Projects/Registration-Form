@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django import forms
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.utils.crypto import get_random_string
 
 import threading
 from syslog import syslog as print
@@ -29,9 +30,10 @@ from django.db import IntegrityError
 from portal.models import Participant
 from portal.serializers import ParticipantSerializer
 
+
+
+# Change this if you want to enable/disable emails service
 DISABLE_EMAIL = settings.DEBUG
-
-
 
 # Create your views here.
 PARTICIPATIONS = [
@@ -41,6 +43,16 @@ PARTICIPATIONS = [
 ]
 
 
+
+# Support functions
+
+def generateSerial():
+	chars = '0123456789abcdefghijklmnopqrstuvwxyz'
+	return get_random_string(16, chars)
+
+
+
+# Views
 
 def send_email(participant):
 	subject = 'ID registrazione Linux Day Roma 2014'
@@ -96,7 +108,13 @@ def index(request):
 				morning = True
 				afternoon = True
 			
+			
+			participant_id = generateSerial()
+			while Participant.objects.filter(participant_id=participant_id).exists():
+				participant_id = generateSerial()
+			
 			p = Participant(
+							participant_id = participant_id,
 							first_name = form.cleaned_data['first_name'],
 							last_name = form.cleaned_data['last_name'],
 							email = form.cleaned_data['email'],
@@ -117,7 +135,7 @@ def index(request):
 				print('Email disabled! No mail was sent to new registered user "' + form.cleaned_data['first_name'] + '".')
 			
 			#return HttpResponseRedirect(reverse('result', args=(p.pk,)))
-			reg_id = p.pk
+			reg_id = participant_id
 			name = p.first_name
 			return render(request, 'portal/result.html', {'reg_id': reg_id, 'name': name})
 

@@ -7,6 +7,7 @@ from django.db import models
 
 # Create your models here.
 class Participant(models.Model):
+	participant_id = models.CharField(max_length=16, primary_key=True)
 	first_name = models.CharField(max_length=128)
 	last_name = models.CharField(max_length=128)
 	email = models.EmailField(unique=True)
