@@ -139,7 +139,7 @@ def index(request):
 			try:
 				p.save()
 			except IntegrityError as e:
-				return HttpResponseRedirect(reverse('error'))
+				return render(request, 'portal/index.html', {'form': form, 'errors': True})
 			
 			# Send the email
 			if not DISABLE_EMAIL:
@@ -148,7 +148,6 @@ def index(request):
 			else:
 				print('Email disabled! No mail was sent to new registered user "' + form.cleaned_data['first_name'] + '".')
 			
-			#return HttpResponseRedirect(reverse('result', args=(p.pk,)))
 			reg_id = participant_id
 			name = p.first_name
 			return render(request, 'portal/result.html', {'reg_id': reg_id, 'name': name})
@@ -157,16 +156,6 @@ def index(request):
 		form = RegistrationForm()
 
 	return render(request, 'portal/index.html', {'form': form})
-
-
-
-def result(request, reg_id):
-	return render(request, 'portal/result.html', {'reg_id': reg_id})
-
-
-
-def error(request):
-	return render(request, 'portal/error.html')
 
 
 

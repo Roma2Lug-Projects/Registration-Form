@@ -1,36 +1,39 @@
-<!DOCTYPE html>
-<!--
-# ----------------------------------------------------------------------- #
-# Copyright (C) 2014-2015 Federico "MrModd" Cosentino (http://mrmodd.it/) #
-# on behalf of Roma2LUG (http://lug.uniroma2.it/)                         #
-# ----------------------------------------------------------------------- #
--->
-
-
-
+{% extends 'portal/base_template.html' %}
 {% load staticfiles %}
+{% load bootstrap %}
 
-<head>
-	<title>Registration Form</title>
-	<style>
-		.center {
-			text-align: center;
-		}
-	</style>
-</head>
+{% block description %}Linux Day{% endblock %}
+{% block title %}Pagina di registrazione{% endblock %}
+{% block content %}
 
-<body>
-	<div class="center">
-		<img src="{% static 'portal/Logo.png' %}" alt="Roma2LUG" />
-		<h1>Linux Day 2014</h1>
-		<h2>25 Ottobre, Facolt&agrave; di Ingegneria<br />Universit&agrave; di Roma Tor Vergata</h2>
-		<h3>Modulo di registrazione<br />Informaci della tua presenza!</h3>
-		<form action="{% url 'index' %}" method="post">
+		<div class="row">
+			<div class="col-sm-12"><h2>24 Ottobre, Facolt&agrave; di Ingegneria<br />Universit&agrave; di Roma Tor Vergata</h2></div>
+		</div>
+		
+		<div class="spacer"></div>
+		
+		<form class="form-horizontal" method="post" action="{% url 'portal:index' %}">
+			<legend>Modulo di registrazione. Informaci della tua presenza!</legend>
 			{% csrf_token %}
-			{{ form.as_p }}
-			<input type="submit" value="Submit" />
+			
+			{% if errors %}
+			<div class="col-sm-10 col-lg-10 col-sm-offset-2">
+				<div class="alert alert-warning alert-dismissible" role="alert">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Chiudi"><span aria-hidden="true">&times;</span></button>
+					<strong>Attenzione</strong>: l'email usata sembra essere gi&agrave; presente nel nostro sistema.
+					Se ritieni che si sia verificato un errore contattaci all'indirizzo <a href="mailto:roma2lug@gmail.com">roma2lug@gmail.com</a>.
+					Altrimenti <a href={% url 'portal:index' %}>torna indietro</a> e riprova con un altro indirizzo.
+				</div>
+			</div>
+			{% endif %}
+			
+			{{ form|bootstrap_horizontal }}
+			<div class="row">
+				<div class="col-sm-10 col-sm-offset-2">
+					<button type="submit" class="btn btn-primary btn-block">Submit</button>
+				</div>
+			</div>
+			
 		</form>
-	</div>
-</body>
-
-</html>
+		
+{% endblock %}

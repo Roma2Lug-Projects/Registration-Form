@@ -12,6 +12,6 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^', include('portal.urls')),
+    url(r'^', include('portal.urls', namespace='portal')),
     url(r'^qr/', include('simple_qrcode.urls')),
 )

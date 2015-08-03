@@ -35,6 +35,13 @@ if [ ! `command -v virtualenv 2> /dev/null` ] ; then
 fi
 echo "OK!"
 
+echo -n "Checking git... "
+if [ ! `command -v git 2> /dev/null` ] ; then
+	echo -e "FAILED!\n\nPlease install git and retry."
+	exit 1
+fi
+echo "OK!"
+
 echo -n "Checking environment path... "
 if [[ $VIRT_ENV =~ ^.*[[:space:]].*$ ]] ; then
 	echo -e "FAILED!\n\nENVIRONMENT path must not contain spaces" >&2
@@ -121,6 +128,34 @@ if [ $? != "0" ] ; then
 	echo -e "FAILED!\n\nCannot install pymaging-png." >&2
 	exit 1
 fi
+echo "OK!"
+
+# Bootstrap
+echo -ne "Installing Bootstrap plugin for Django"
+CURR=$(pwd)
+TMP=$(mktemp -d)
+cd $TMP
+echo -n "."
+git clone https://github.com/tzangms/django-bootstrap-form.git 2> /dev/null
+if [ $? != "0" ] ; then
+	echo -e "FAILED!\n\nCannot get Bootstrap repository." >&2
+	exit 1
+fi
+echo -n "."
+cd django-bootstrap-form
+python3 setup.py sdist > /dev/null
+if [ $? != "0" ] ; then
+	echo -e "FAILED!\n\nCannot pack Bootstrap plugin." >&2
+	exit 1
+fi
+echo -n ". "
+pip3 install dist/*.tar.gz > /dev/null
+if [ $? != "0" ] ; then
+	echo -e "FAILED!\n\nCannot install Bootstrap." >&2
+	exit 1
+fi
+cd $CURR
+rm -rf $TMP
 echo "OK!"
 
 

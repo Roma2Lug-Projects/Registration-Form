@@ -5,6 +5,9 @@
 Copyright (C) 2014-2015 Federico "MrModd" Cosentino (http://mrmodd.it/)
 on behalf of Roma2LUG (http://lug.uniroma2.it/)
 
+Django-bootstrap-form Copyright (c) by Ming Hsien Tzang
+Bootstrap under MIT license
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or

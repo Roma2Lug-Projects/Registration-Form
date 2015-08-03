@@ -62,6 +62,7 @@ INSTALLED_APPS = (
 	'portal',
 	'simple_qrcode',
 	'rest_framework',
+	'bootstrapform',
 )
 
 MIDDLEWARE_CLASSES = (
