@@ -10,7 +10,7 @@ from portal.models import Participant
 
 class ParticipantAdmin(admin.ModelAdmin):
 	fieldsets = [
-		('Participant',		{'fields': ['first_name', 'last_name', 'email']}),
+		('Participant',		{'fields': ['first_name', 'last_name', 'email', 'mailing_list']}),
 		('Presences',		{'fields': ['participate_morning', 'participate_afternoon']}),
 		('Registration',	{'fields': ['registration_date', 'check_in']}),
 		('Comments',		{'fields': ['comments',], 'classes': ['collapse']}),
@@ -19,16 +19,17 @@ class ParticipantAdmin(admin.ModelAdmin):
 	readonly_fields = ['registration_date',]
 	
 	list_display = [
-		'pk',
+		'participant_id',
 		'first_name',
 		'last_name',
 		'email',
+		'mailing_list',
 		'participate_morning',
 		'participate_afternoon',
 		'registration_date',
 		'check_in']
 	
-	list_filter = ['participate_morning', 'participate_afternoon', 'check_in',]
+	list_filter = ['participate_morning', 'participate_afternoon', 'check_in', 'mailing_list']
 	search_fields = ['participant_id', 'first_name', 'last_name', 'email',]
 	ordering = ['registration_date', 'check_in',]
 

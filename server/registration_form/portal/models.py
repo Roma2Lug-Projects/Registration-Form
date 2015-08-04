@@ -12,6 +12,8 @@ class Participant(models.Model):
 	last_name = models.CharField(max_length=128)
 	email = models.EmailField(unique=True)
 	
+	mailing_list = models.BooleanField(default=True)
+	
 	participate_morning = models.BooleanField(default=False)
 	participate_afternoon = models.BooleanField(default=False)
 	

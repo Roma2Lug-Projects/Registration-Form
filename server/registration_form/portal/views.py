@@ -36,13 +36,6 @@ from portal.serializers import ParticipantSerializer
 # Change this if you want to enable/disable emails service
 DISABLE_EMAIL = settings.DEBUG
 
-# Create your views here.
-PARTICIPATIONS = [
-	[0, 'Mattina'],
-	[1, 'Pomeriggio'],
-	[2, 'Mattina e pomeriggio'],
-]
-
 
 
 # Support functions and classes
@@ -91,13 +84,22 @@ def send_email(participant):
 	
 	mail.send(fail_silently=True)
 
+PARTICIPATIONS = [
+	[0, 'Mattina'],
+	[1, 'Pomeriggio'],
+	[2, 'Mattina e pomeriggio'],
+]
+# Campi del form di registrazione
 class RegistrationForm(forms.Form):
-	
 	first_name = forms.CharField(label='Nome*', max_length=128, required=True)
 	last_name = forms.CharField(label='Cognome*', max_length=128, required=True)
 	email = forms.EmailField(label='Email*', required=True)
 	participates = forms.ChoiceField(label='Partecipazione', choices=PARTICIPATIONS, required=False)
 	comments = forms.CharField(label='Commenti', max_length=512, widget=forms.Textarea, required=False)
+	mailing_list = forms.BooleanField(label='Consenti di ricevere email riguardanti il Linux Day come variazioni sul programma o eventi speciali.', initial=True, required=False)
+
+def get_mails():
+	return Participant.objects.filter(mailing_list=True).value_list('email', flat=True)
 
 
 
@@ -132,6 +134,7 @@ def index(request):
 							first_name = form.cleaned_data['first_name'],
 							last_name = form.cleaned_data['last_name'],
 							email = form.cleaned_data['email'],
+							mailing_list = form.cleaned_data['mailing_list'],
 							comments = form.cleaned_data['comments'],
 							participate_morning = morning,
 							participate_afternoon = afternoon
