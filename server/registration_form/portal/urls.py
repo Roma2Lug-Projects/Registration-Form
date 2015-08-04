@@ -14,4 +14,8 @@ urlpatterns = patterns('',
 	url(r'^rest/$', views.RESTParticipantList.as_view(), name='rest_list'),
 	url(r'^rest/(?P<pk>[a-z0-9]{16})/$', views.RESTParticipantDetail.as_view(), name='rest_detail'),
 	url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+	
+	# Access management
+	url(r'^accounts/login/$', views.login, name='login'),
+	url(r'^accounts/logout/$', views.logout, name='logout'),
 )

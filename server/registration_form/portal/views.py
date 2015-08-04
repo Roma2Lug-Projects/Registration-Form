@@ -3,15 +3,20 @@
 # on behalf of Roma2LUG (http://lug.uniroma2.it/)                         #
 # ----------------------------------------------------------------------- #
 
+# Python basic libraries
+import threading
+from syslog import syslog as print
+
+# Django components
+from django.conf import settings
 from django.shortcuts import render
 from django import forms
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
 
-import threading
-from syslog import syslog as print
-from django.conf import settings
+# Authentication
+import django.contrib.auth
 
 # REST
 from rest_framework import generics
@@ -43,6 +48,12 @@ DISABLE_EMAIL = settings.DEBUG
 def generateSerial():
 	chars = '0123456789abcdefghijklmnopqrstuvwxyz'
 	return get_random_string(16, chars)
+
+def getUniqueParticipantID():
+	participant_id = generateSerial()
+	while Participant.objects.filter(participant_id=participant_id).exists():
+		participant_id = generateSerial()
+	return participant_id
 
 def send_email(participant):
 	# Generate QRCode
@@ -124,10 +135,7 @@ def index(request):
 				morning = True
 				afternoon = True
 			
-			
-			participant_id = generateSerial()
-			while Participant.objects.filter(participant_id=participant_id).exists():
-				participant_id = generateSerial()
+			participant_id = getUniqueParticipantID()
 			
 			p = Participant(
 							participant_id = participant_id,
@@ -158,7 +166,7 @@ def index(request):
 	else:
 		form = RegistrationForm()
 
-	return render(request, 'portal/index.html', {'form': form})
+	return render(request, 'portal/index.html', {'form': form, 'user': request.user})
 
 
 
@@ -172,3 +180,48 @@ class RESTParticipantDetail(generics.RetrieveUpdateDestroyAPIView):
 	permission_classes = (permissions.IsAuthenticated,)
 	queryset = Participant.objects.all()
 	serializer_class = ParticipantSerializer
+
+
+
+# System wide views
+
+def login(request):
+	if request.method == 'GET':
+		if request.user.is_authenticated():
+			return HttpResponseRedirect(reverse('portal:index'))
+		else:
+			nexturl = request.GET.get('next', '')
+			return render(request, 'portal/login.html', {'next': nexturl})
+	
+	elif request.method == 'POST':
+		username = request.POST['username']
+		password = request.POST['password']
+		nexturl = request.POST.get('next', '')
+		
+		user = django.contrib.auth.authenticate(username=username, password=password)
+		if user is not None:
+			if user.is_active:
+				# Registered user, log user in
+				django.contrib.auth.login(request, user)
+				if nexturl:
+					return HttpResponseRedirect(nexturl)
+				else:
+					return HttpResponseRedirect(reverse('portal:index'))
+					
+			else:
+				# Inactive user
+				return render(request, 'portal/login.html', {'error_message': 'Il tuo account non &egrave attivo'})
+				
+		else:
+			# Invalid credential
+			content = {
+						'error_message': 'Errore di autenticazione!',
+						'username': username
+			}
+			return render(request, 'portal/login.html', content)
+
+def logout(request):
+	if request.user.is_authenticated():
+		django.contrib.auth.logout(request)
+		
+	return render(request, 'portal/logout.html')
