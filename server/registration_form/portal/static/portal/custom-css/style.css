@@ -7,9 +7,10 @@ body {
   text-align: center;
 }
 img.center {
-    display: block;
+    display: inline-block;
     margin-left: auto;
     margin-right: auto;
+    max-width: 100%;
 }
 h1, h2, h3, h4, legend {
 	text-align: center;

@@ -73,7 +73,10 @@
     <div class="container">
 
 	  <div class="row">
-		<div class="col-sm-12"><a href="{% url 'portal:index' %}"><img class="center" src="{% static 'portal/img/Logo.png' %}" alt="Roma2LUG" /></a></div>
+		<div class="col-sm-12" style="text-align: center"><a href="{% url 'portal:index' %}">
+			<img class="center" src="{% static 'portal/img/Logo.png' %}" alt="Roma2LUG" />
+			<img class="center" src="{% static 'portal/img/lugroma3.png' %}" alt="LugRoma3" />
+		</a></div>
 		<div class="col-sm-12"><legend><h1>Linux Day 2015</h1></legend></div>
 	  </div>
 	  {% block content %}
