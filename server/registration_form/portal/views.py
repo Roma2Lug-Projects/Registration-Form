@@ -9,13 +9,14 @@ from syslog import syslog as print
 
 # Django components
 from django.conf import settings
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django import forms
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.http import Http404
 
 # Authentication
 import django.contrib.auth
@@ -224,6 +225,18 @@ def checked_in(request):
 			'registration_date',
 			'mailing_list').order_by('last_name')
 	return render(request, 'portal/participant_list.html', {'participants': participants})
+
+@require_http_methods(["GET",])
+@login_required
+def participant_details(request):
+	try:
+		participant_id = request.GET.get('id')
+	except:
+		raise Http404("ID inesistente")
+	
+	participant = get_object_or_404(Participant, participant_id=participant_id)
+	
+	return render(request, 'portal/participant.html', {'p': participant})
 
 
 
