@@ -14,6 +14,8 @@ from django import forms
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 
 # Authentication
 import django.contrib.auth
@@ -116,10 +118,11 @@ def get_mails():
 
 # Views
 
+@require_http_methods(["GET", "POST"])
 def index(request):
 	# if this is a POST request we need to process the form data
 	if request.method == 'POST':
-		# create a form instance and populate it with data from the request:
+		# Create a form instance and populate it with data from the request:
 		form = RegistrationForm(request.POST)
 
 		if form.is_valid():
@@ -164,9 +167,63 @@ def index(request):
 			return render(request, 'portal/result.html', {'reg_id': reg_id, 'name': name})
 
 	else:
-		form = RegistrationForm()
+		# This is a GET HTTP request
+		content = {'user': request.user}
+		
+		if request.user.is_authenticated():
+			# Show a page summary
+			registered_users = Participant.objects.count()
+			content['registered_users'] = registered_users
+			mailable_users = Participant.objects.filter(mailing_list=True).count()
+			content['mailable_users'] = mailable_users
+			seen_users = Participant.objects.filter(check_in__isnull=False).count()
+			content['seen_users'] = seen_users
+		
+		else:
+			# Show the registration form
+			form = RegistrationForm()
+			content['form'] = form
+		
+		return render(request, 'portal/index.html', content)
 
-	return render(request, 'portal/index.html', {'form': form, 'user': request.user})
+@require_http_methods(["GET",])
+@login_required
+def participant_list(request):
+	participants = Participant.objects.values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'participate_morning',
+			'participate_afternoon',
+			'registration_date',
+			'mailing_list').order_by('last_name')
+	return render(request, 'portal/participant_list.html', {'participants': participants})
+
+@require_http_methods(["GET",])
+@login_required
+def mailing_list(request):
+	participants = Participant.objects.filter(mailing_list=True).values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'participate_morning',
+			'participate_afternoon',
+			'registration_date',
+			'mailing_list').order_by('last_name')
+	return render(request, 'portal/participant_list.html', {'participants': participants})
+
+@require_http_methods(["GET",])
+@login_required
+def checked_in(request):
+	participants = Participant.objects.filter(check_in__isnull=False).values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'participate_morning',
+			'participate_afternoon',
+			'registration_date',
+			'mailing_list').order_by('last_name')
+	return render(request, 'portal/participant_list.html', {'participants': participants})
 
 
 

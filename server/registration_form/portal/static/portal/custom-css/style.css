@@ -21,3 +21,7 @@ div.comment {
 	font-size: 18px;
 	text-align: center;
 }
+.col-centered {
+    float: none;
+    margin: 0 auto;
+}

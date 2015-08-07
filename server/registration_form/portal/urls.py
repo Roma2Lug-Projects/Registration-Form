@@ -11,6 +11,11 @@ urlpatterns = patterns('',
 	
 	# Registration form
 	url(r'^$', views.index, name='index'),
+	url(r'^participants$', views.participant_list, name='participants'),
+	url(r'^mailing_list$', views.mailing_list, name='mailing_list'),
+	url(r'^checked_in$', views.checked_in, name='checked_in'),
+	
+	# REST interfaces
 	url(r'^rest/$', views.RESTParticipantList.as_view(), name='rest_list'),
 	url(r'^rest/(?P<pk>[a-z0-9]{16})/$', views.RESTParticipantDetail.as_view(), name='rest_detail'),
 	url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),

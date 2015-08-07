@@ -6,6 +6,29 @@
 {% block title %}Pagina di registrazione{% endblock %}
 {% block content %}
 
+{% if user and user.is_authenticated %}
+		<div class="row">
+			<div class="col-sm-12"><h2>Pagina riassuntiva</h2></div>
+		</div>
+		
+		<div class="row">
+			<div class="col-sm-12">
+				<table class="table table-striped table-bordered">
+					<tbody>
+						<tr>
+							<th><b>Utenti registrati</b>:</th><th><a href="{% url 'portal:participants' %}">{{ registered_users }}</a></th>
+						</tr>
+						<tr>
+							<th><b>Utenti abilitati a ricevere email</b>:</th><th><a href="{% url 'portal:mailing_list' %}">{{ mailable_users }}</a></th>
+						</tr>
+						<tr>
+							<th><b>Presenze</b>:</th><th><a href="{% url 'portal:checked_in' %}">{{ seen_users }}</a></th>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+{% else %}
 		<div class="row">
 			<div class="col-sm-12"><h2>24 Ottobre, Facolt&agrave; di Ingegneria<br />Universit&agrave; di Roma Tor Vergata</h2></div>
 		</div>
@@ -33,7 +56,7 @@
 					<button type="submit" class="btn btn-primary btn-block">Submit</button>
 				</div>
 			</div>
-			
 		</form>
+{% endif %}
 		
 {% endblock %}
