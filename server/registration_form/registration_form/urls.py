@@ -13,5 +13,5 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('portal.urls', namespace='portal')),
-    url(r'^qr/', include('simple_qrcode.urls')),
+    url(r'^qr/', include('simple_qrcode.urls', namespace='qrcodes')),
 )
