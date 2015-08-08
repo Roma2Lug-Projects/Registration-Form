@@ -4,7 +4,7 @@
 # ----------------------------------------------------------------------- #
 
 from django.contrib import admin
-from portal.models import Participant
+from portal.models import Participant, AdminProperties
 
 # Register your models here.
 
@@ -33,6 +33,21 @@ class ParticipantAdmin(admin.ModelAdmin):
 	search_fields = ['participant_id', 'first_name', 'last_name', 'email',]
 	ordering = ['registration_date', 'check_in',]
 
-
 admin.site.register(Participant, ParticipantAdmin)
 
+
+
+class PropertiesAdmin(admin.ModelAdmin):
+	fieldsets = [
+		(None,		{'fields': ['key', 'value']}),
+	]
+	
+	list_display = [
+		'key',
+		'value',]
+	
+	search_fields = ['key',]
+	ordering = ['key',]
+
+
+admin.site.register(AdminProperties, PropertiesAdmin)

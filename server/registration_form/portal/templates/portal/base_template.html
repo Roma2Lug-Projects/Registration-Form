@@ -47,6 +47,11 @@
                 <li class="divider"></li>
 	{% endif %}
                 <li class="dropdown-header">Gestione</li>
+                {% if disabled %}
+                <li><a href="{% url 'portal:index' %}?disable=false"><b>Abilita reg. pubblica</b></a></li>
+                {% else %}
+				<li><a href="{% url 'portal:index' %}?disable=true">Disabilita reg. pubblica</a></li>
+				{% endif %}
 				<li><a href="{% url 'portal:admin_form' %}">Registra nuovi utenti</a></li>
 				<li><a href="{% url 'portal:email_sender' %}?id=all">Invia email</a></li>
                 <li class="divider"></li>

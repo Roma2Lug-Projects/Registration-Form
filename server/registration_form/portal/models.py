@@ -24,3 +24,10 @@ class Participant(models.Model):
 	
 	def __str__(self):
 		return str(self.first_name) + ' ' + str(self.last_name)
+
+class AdminProperties(models.Model):
+	key = models.CharField(max_length=32, primary_key=True)
+	value = models.CharField(max_length=32)
+	
+	def __str__(self):
+		return '{\'' + str(self.key) + '\': \'' + str(self.value) + '\'}'

@@ -19,6 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.http import Http404
 from django.core import validators
+from django.core.exceptions import ObjectDoesNotExist
 
 # Authentication
 import django.contrib.auth
@@ -38,7 +39,7 @@ from io import BytesIO
 
 # Model
 from django.db import IntegrityError
-from portal.models import Participant
+from portal.models import Participant, AdminProperties
 from portal.serializers import ParticipantSerializer
 
 
@@ -182,10 +183,13 @@ def index(request):
 			else:
 				print('Email disabled! No mail was sent to new registered user "' + form.cleaned_data['first_name'] + '".')
 			
+			# Populate the response
 			reg_id = participant_id
 			name = p.first_name
 			return render(request, 'portal/result.html', {'reg_id': reg_id, 'name': name})
+			
 		else:
+			# Invalid form, an error will be shown
 			return render(request, 'portal/index.html', {'form': form})
 
 	else:
@@ -193,7 +197,25 @@ def index(request):
 		context = {}
 		
 		if request.user.is_authenticated():
-			# Show a page summary
+			# If requested to disable/enable the public form, change the object in the model
+			disable = request.GET.get('disable')
+			if disable:
+				if disable == 'true':
+					try:
+						prop = AdminProperties.objects.get(key='disable_public_form')
+						prop.value = 'true'
+					except ObjectDoesNotExist:
+						prop = AdminProperties(key='disable_public_form', value='true')
+					prop.save()
+				elif disable == 'false':
+					try:
+						prop = AdminProperties.objects.get(key='disable_public_form')
+						prop.value = 'false'
+					except ObjectDoesNotExist:
+						prop = AdminProperties(key='disable_public_form', value='false')
+					prop.save()
+			
+			# Populate the page summary
 			registered_users = Participant.objects.count()
 			context['registered_users'] = registered_users
 			
@@ -210,9 +232,13 @@ def index(request):
 			context['seen_users'] = seen_users
 		
 		else:
-			# Show the registration form
+			# User is anonymous: show the public registration form
 			form = RegistrationForm()
 			context['form'] = form
+		
+		# Check if public form is disabled
+		if AdminProperties.objects.filter(key='disable_public_form', value='true').exists():
+			context['disabled'] = True
 		
 		return render(request, 'portal/index.html', context)
 
