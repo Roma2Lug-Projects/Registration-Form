@@ -6,6 +6,7 @@
 # Python basic libraries
 import threading
 from syslog import syslog as print
+from datetime import datetime
 
 # Django components
 from django.conf import settings
@@ -277,6 +278,14 @@ def participant_details(request):
 		raise Http404('Non è stato richiesto nessun ID')
 	
 	participant = get_object_or_404(Participant, participant_id=participant_id)
+	
+	do_checkin = request.GET.get('do_checkin')
+	if do_checkin:
+		if do_checkin == 'true':
+			participant.check_in = datetime.now()
+		elif do_checkin == 'false':
+			participant.check_in = None
+		participant.save()
 	
 	return render(request, 'portal/participant.html', {'p': participant})
 
