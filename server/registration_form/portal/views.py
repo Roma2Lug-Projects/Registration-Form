@@ -175,8 +175,16 @@ def index(request):
 			# Show a page summary
 			registered_users = Participant.objects.count()
 			content['registered_users'] = registered_users
+			
+			morning_users = Participant.objects.filter(participate_morning=True).count()
+			content['morning_users'] = morning_users
+			
+			afternoon_users = Participant.objects.filter(participate_afternoon=True).count()
+			content['afternoon_users'] = afternoon_users
+			
 			mailable_users = Participant.objects.filter(mailing_list=True).count()
 			content['mailable_users'] = mailable_users
+			
 			seen_users = Participant.objects.filter(check_in__isnull=False).count()
 			content['seen_users'] = seen_users
 		
@@ -198,7 +206,33 @@ def participant_list(request):
 			'participate_afternoon',
 			'registration_date',
 			'mailing_list').order_by('last_name')
-	return render(request, 'portal/participant_list.html', {'participants': participants})
+	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista di tutte le persone iscritte'})
+
+@require_http_methods(["GET",])
+@login_required
+def morning_users(request):
+	participants = Participant.objects.filter(participate_morning=True).values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'participate_morning',
+			'participate_afternoon',
+			'registration_date',
+			'mailing_list').order_by('last_name')
+	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista degli iscritti per la mattina'})
+
+@require_http_methods(["GET",])
+@login_required
+def afternoon_users(request):
+	participants = Participant.objects.filter(participate_afternoon=True).values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'participate_morning',
+			'participate_afternoon',
+			'registration_date',
+			'mailing_list').order_by('last_name')
+	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista degli iscritti per il pomeriggio'})
 
 @require_http_methods(["GET",])
 @login_required
@@ -211,7 +245,7 @@ def mailing_list(request):
 			'participate_afternoon',
 			'registration_date',
 			'mailing_list').order_by('last_name')
-	return render(request, 'portal/participant_list.html', {'participants': participants})
+	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista delle persone autorizzate a ricevere email'})
 
 @require_http_methods(["GET",])
 @login_required
@@ -224,7 +258,7 @@ def checked_in(request):
 			'participate_afternoon',
 			'registration_date',
 			'mailing_list').order_by('last_name')
-	return render(request, 'portal/participant_list.html', {'participants': participants})
+	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Persone già presenti all\'evento'})
 
 @require_http_methods(["GET",])
 @login_required

@@ -12,9 +12,11 @@ urlpatterns = patterns('',
 	# Registration form
 	url(r'^$', views.index, name='index'),
 	url(r'^participants$', views.participant_list, name='participants'),
-	url(r'^mailing_list$', views.mailing_list, name='mailing_list'),
-	url(r'^checked_in$', views.checked_in, name='checked_in'),
-	url(r'^details$', views.participant_details, name='participant_details'),
+	url(r'^participants/morning$', views.morning_users, name='morning_users'),
+	url(r'^participants/afternoon$', views.afternoon_users, name='afternoon_users'),
+	url(r'^participants/mailing_list$', views.mailing_list, name='mailing_list'),
+	url(r'^participants/checked_in$', views.checked_in, name='checked_in'),
+	url(r'^participants/details$', views.participant_details, name='participant_details'),
 	
 	# REST interfaces
 	url(r'^rest/$', views.RESTParticipantList.as_view(), name='rest_list'),

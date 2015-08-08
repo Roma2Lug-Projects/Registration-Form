@@ -19,6 +19,12 @@
 							<th><b>Utenti registrati</b>:</th><th><a href="{% url 'portal:participants' %}">{{ registered_users }}</a></th>
 						</tr>
 						<tr>
+							<th><b>Partecipanti la mattina</b>:</th><th><a href="{% url 'portal:morning_users' %}">{{ morning_users }}</a></th>
+						</tr>
+						<tr>
+							<th><b>Partecipanti il pomeriggio</b>:</th><th><a href="{% url 'portal:afternoon_users' %}">{{ afternoon_users }}</a></th>
+						</tr>
+						<tr>
 							<th><b>Utenti abilitati a ricevere email</b>:</th><th><a href="{% url 'portal:mailing_list' %}">{{ mailable_users }}</a></th>
 						</tr>
 						<tr>
