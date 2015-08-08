@@ -21,3 +21,6 @@ class Participant(models.Model):
 	check_in = models.DateTimeField(blank=True, null=True)
 	
 	comments = models.TextField(blank=True)
+	
+	def __str__(self):
+		return str(self.first_name) + ' ' + str(self.last_name)

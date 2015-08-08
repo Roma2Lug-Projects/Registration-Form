@@ -26,7 +26,7 @@ from rest_framework import generics
 from rest_framework import permissions
 
 # Email
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, send_mass_mail
 from email.mime.image import MIMEImage
 
 # QR Code
@@ -42,7 +42,8 @@ from portal.serializers import ParticipantSerializer
 
 
 # Change this if you want to enable/disable emails service
-DISABLE_EMAIL = settings.DEBUG
+#DISABLE_EMAIL = settings.DEBUG
+DISABLE_EMAIL = False
 
 
 
@@ -58,7 +59,7 @@ def getUniqueParticipantID():
 		participant_id = generateSerial()
 	return participant_id
 
-def send_email(participant):
+def send_registration_email(participant):
 	# Generate QRCode
 	img = qrcode.make(participant.participant_id, image_factory=PymagingImage)
 	img_stream = BytesIO()
@@ -66,7 +67,7 @@ def send_email(participant):
 	
 	# Compose email
 	subject = 'ID registrazione Linux Day Roma 2014'
-	from_email = 'Roma2LUG <roma2lug@gmail.com>'
+	from_email = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
 	
 	text = 'Caro ' + participant.first_name + ',\n'
 	text += 'grazie per esserti iscritto al nostro Linux Day.\n'
@@ -98,6 +99,17 @@ def send_email(participant):
 	
 	mail.send(fail_silently=True)
 
+def send_email(participants, subject, message):
+	from_email = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
+	
+	email_list = []
+	for p in participants:
+		email = str(p) + ' <' + p.email + '>'
+		email_list.append((subject, message, from_email, [email,]))
+	email_tuples = tuple(email_list)
+	
+	send_mass_mail(email_tuples, fail_silently=True)
+
 PARTICIPATIONS = [
 	[0, 'Mattina'],
 	[1, 'Pomeriggio'],
@@ -112,14 +124,11 @@ class RegistrationForm(forms.Form):
 	comments = forms.CharField(label='Commenti', max_length=512, widget=forms.Textarea, required=False)
 	mailing_list = forms.BooleanField(label='Consenti di ricevere email riguardanti il Linux Day come variazioni sul programma o eventi speciali.', initial=True, required=False)
 
-def get_mails():
-	return Participant.objects.filter(mailing_list=True).value_list('email', flat=True)
-
 
 
 # Views
 
-@require_http_methods(["GET", "POST"])
+@require_http_methods(['GET', 'POST'])
 def index(request):
 	# if this is a POST request we need to process the form data
 	if request.method == 'POST':
@@ -158,7 +167,7 @@ def index(request):
 			
 			# Send the email
 			if not DISABLE_EMAIL:
-				t = threading.Thread(target=send_email, args=(p,))
+				t = threading.Thread(target=send_registration_email, args=(p,))
 				t.start()
 			else:
 				print('Email disabled! No mail was sent to new registered user "' + form.cleaned_data['first_name'] + '".')
@@ -169,7 +178,7 @@ def index(request):
 
 	else:
 		# This is a GET HTTP request
-		content = {'user': request.user}
+		content = {}
 		
 		if request.user.is_authenticated():
 			# Show a page summary
@@ -195,7 +204,7 @@ def index(request):
 		
 		return render(request, 'portal/index.html', content)
 
-@require_http_methods(["GET",])
+@require_http_methods(['GET',])
 @login_required
 def participant_list(request):
 	participants = Participant.objects.values(
@@ -208,7 +217,7 @@ def participant_list(request):
 			'mailing_list').order_by('last_name')
 	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista di tutte le persone iscritte'})
 
-@require_http_methods(["GET",])
+@require_http_methods(['GET',])
 @login_required
 def morning_users(request):
 	participants = Participant.objects.filter(participate_morning=True).values(
@@ -221,7 +230,7 @@ def morning_users(request):
 			'mailing_list').order_by('last_name')
 	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista degli iscritti per la mattina'})
 
-@require_http_methods(["GET",])
+@require_http_methods(['GET',])
 @login_required
 def afternoon_users(request):
 	participants = Participant.objects.filter(participate_afternoon=True).values(
@@ -234,7 +243,7 @@ def afternoon_users(request):
 			'mailing_list').order_by('last_name')
 	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista degli iscritti per il pomeriggio'})
 
-@require_http_methods(["GET",])
+@require_http_methods(['GET',])
 @login_required
 def mailing_list(request):
 	participants = Participant.objects.filter(mailing_list=True).values(
@@ -247,7 +256,7 @@ def mailing_list(request):
 			'mailing_list').order_by('last_name')
 	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista delle persone autorizzate a ricevere email'})
 
-@require_http_methods(["GET",])
+@require_http_methods(['GET',])
 @login_required
 def checked_in(request):
 	participants = Participant.objects.filter(check_in__isnull=False).values(
@@ -260,17 +269,57 @@ def checked_in(request):
 			'mailing_list').order_by('last_name')
 	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Persone già presenti all\'evento'})
 
-@require_http_methods(["GET",])
+@require_http_methods(['GET',])
 @login_required
 def participant_details(request):
-	try:
-		participant_id = request.GET.get('id')
-	except:
-		raise Http404("ID inesistente")
+	participant_id = request.GET.get('id')
+	if not participant_id:
+		raise Http404('Non è stato richiesto nessun ID')
 	
 	participant = get_object_or_404(Participant, participant_id=participant_id)
 	
 	return render(request, 'portal/participant.html', {'p': participant})
+
+@require_http_methods(['GET','POST'])
+@login_required
+def email_sender(request):
+	if request.method == 'GET':
+		participant_id = request.GET.get('id')
+		if not participant_id:
+			raise Http404('Non è stato richiesto nessun ID')
+		if not (participant_id == 'all' or Participant.objects.filter(mailing_list=True, participant_id=participant_id).exists()):
+			raise Http404('ID non valido')
+		
+		content = {'participant_id': participant_id,
+				'from': settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'}
+		
+		if participant_id == 'all':
+			content['to'] = str(Participant.objects.filter(mailing_list=True).count()) + ' partecipanti'
+		else:
+			participant = Participant.objects.get(participant_id=participant_id)
+			content['to'] = str(participant)
+		
+		return render(request, 'portal/emails.html', content)
+	
+	else:
+		participant_id = request.POST['participant_id']
+		subject = request.POST['subject']
+		message = request.POST['message']
+		
+		if participant_id == 'all':
+			participants = Participant.objects.filter(mailing_list=True)
+			
+		else:
+			participants = Participant.objects.filter(mailing_list=True, participant_id=participant_id)
+		
+		# Send the email
+		if not DISABLE_EMAIL:
+			t = threading.Thread(target=send_email, args=(participants, subject, message))
+			t.start()
+		else:
+			print('Email disabled! No mail was sent.')
+		
+		return render(request, 'portal/emails.html', {'confirm_message': 'L\'email è stata inviata a ' + str(len(participants)) + ' partecipanti.'})
 
 
 

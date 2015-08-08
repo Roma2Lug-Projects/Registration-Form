@@ -1,6 +1,5 @@
 {% extends 'portal/base_template.html' %}
 {% load staticfiles %}
-{% load bootstrap %}
 
 {% block description %}Linux Day{% endblock %}
 {% block title %}{{ p.first_name }} {{ p.last_name }}{% endblock %}
@@ -24,6 +23,9 @@
 							<th><b>Cognome</b>:</th><th>{{ p.last_name }}</th>
 						</tr>
 						<tr>
+							<th><b>Mailing list</b>:</th><th>{% if p.mailing_list %}Si, <a href="{% url 'portal:email_sender' %}?id={{ p.participant_id }}">invia email</a>{% else %}No{% endif %}</th>
+						</tr>
+						<tr>
 							<th><b>Partecipazione mattina</b>:</th><th>{{ p.participate_morning }}</th>
 						</tr>
 						<tr>
@@ -33,7 +35,7 @@
 							<th><b>Data registrazione</b>:</th><th>{{ p.registration_date }}</th>
 						</tr>
 						<tr>
-							<th><b>Orario check-in</b>:</th><th>{{ p.check_in }}</th>
+							<th><b>Orario check-in</b>:</th><th>{% if not p.check_in %}<a href="{% url 'portal:participant_details' %}?id={{ p.participant_id }}&do_checkin=true">Fai check-in ora</a>{% else %}{{ p.check_in }} <a href="{% url 'portal:participant_details' %}?id={{ p.participant_id }}&do_checkin=false">annulla</a>{% endif %}</th>
 						</tr>
 						<tr>
 							<th><b>Commenti</b>:</th><th>{{ p.comments }}</th>
@@ -42,21 +44,5 @@
 				</table>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-sm-12"><legend><h1>Gestione</h1></legend></div>
-		</div>
-		<form class="form-horizontal">
-			<fieldset>
-				
-				<!-- Button -->
-				<div class="form-group">
-				  <label class="col-sm-6 col-lg-6 control-label" for="levels">This is a button</label>
-				  <div class="col-sm-6 col-lg-6">
-					<a class="btn btn-lg btn-danger" href="#" role="button">GO!</a>
-				  </div>
-				</div>
-
-			</fieldset>
-		</form>
 
 {% endblock %}

@@ -6,6 +6,28 @@
 {% block title %}Pagina di registrazione{% endblock %}
 {% block content %}
 
+		{% if error_message %}
+		<div class="row">
+			<div class="col-sm-10 col-lg-10 col-sm-offset-2">
+				<div class="alert alert-alert alert-dismissible" role="alert">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Chiudi"><span aria-hidden="true">&times;</span></button>
+					{{ error_message }}
+				</div>
+			</div>
+		</div>
+		{% endif %}
+
+		{% if confirm_message %}
+		<div class="row">
+			<div class="col-sm-10 col-lg-10 col-sm-offset-2">
+				<div class="alert alert-success alert-dismissible" role="alert">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Chiudi"><span aria-hidden="true">&times;</span></button>
+					{{ confirm_message }}
+				</div>
+			</div>
+		</div>
+		{% endif %}
+
 {% if user and user.is_authenticated %}
 		<div class="row">
 			<div class="col-sm-12"><h2>Pagina riassuntiva</h2></div>
@@ -59,7 +81,7 @@
 			{{ form|bootstrap_horizontal }}
 			<div class="row">
 				<div class="col-sm-10 col-sm-offset-2">
-					<button type="submit" class="btn btn-primary btn-block">Submit</button>
+					<button type="submit" class="btn btn-primary btn-block">Registra</button>
 				</div>
 			</div>
 		</form>
