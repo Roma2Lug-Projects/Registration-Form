@@ -28,6 +28,7 @@
 		</div>
 		{% endif %}
 
+{% if user.is_authenticated %}
 		{% if disabled %}
 		<div class="row">
 			<div class="col-sm-12 col-lg-12">
@@ -38,8 +39,7 @@
 			</div>
 		</div>
 		{% endif %}
-
-{% if user and user.is_authenticated %}
+		
 		<div class="row">
 			<div class="col-sm-12"><h2>Pagina riassuntiva</h2></div>
 		</div>
