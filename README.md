@@ -22,8 +22,8 @@ GNU General Public License for more details.
 
 ## What is it?
 
-This project is the registration form for the Linux Day 2014 event organized
-by Roma2LUG. It is divided in a server and a client:
+This project is the registration form for the Linux Day 2015 event organized
+by Roma2LUG and LUGRoma3. It is divided in a server and a client:
 
 - **server**: this part is a Web server, written in Python with the Django
   framework and the Django-REST-framework interface. Users which want to
@@ -54,10 +54,11 @@ If the server URL is http://example.com:8080/, these URLs are available:
 - *http://example.com:8080/admin/*: this is the Django administration portal
   where you can create and delete administration users and manage participant
   registrations
-- *http://example.com:8080/qr/123*: this page shows a QR Code with ID 123
-- *http://example.com:8080/qr/dl/123.svg*: this page generate an svg image of
-  a QR Code with 123 written in it
-- *http://example.com:8080/qr/dl/123.png*: same as above, but in png format
+- *http://example.com:8080/qr/0123456789abcdef*: this page shows a QR Code with ID
+  0123456789abcdef (must be 16 characters)
+- *http://example.com:8080/qr/0123456789abcdef.svg*: this page generate an svg image of
+  a QR Code with 0123456789abcdef written in it
+- *http://example.com:8080/qr/0123456789abcdef.png*: same as above, but in png format
 
 ### Important files
 
