@@ -103,6 +103,7 @@ def send_registration_email(participant):
 	
 	mail.send(fail_silently=True)
 
+# Send a generic email to participant(s)
 def send_email(participants, subject, message):
 	from_email = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
 	
@@ -114,12 +115,38 @@ def send_email(participants, subject, message):
 	
 	send_mass_mail(email_tuples, fail_silently=True)
 
+# Given a search keyword(s) find all possible participants that match
+def do_search(query):
+	# Check if it is an ID
+	if Participant.objects.filter(participant_id=query).exists():
+		return Participant.objects.filter(participant_id=query)
+	
+	# Check if it is an email
+	if '@' in query and Participant.objects.filter(email=query).exists():
+		return Participant.objects.filter(email=query)
+	
+	p = []
+	# Try the whole query as name
+	p.extend(Participant.objects.filter(first_name__icontains=query)) # icontains: contains (substring) case insensitive
+	p.extend(Participant.objects.filter(last_name__icontains=query))
+	if len(p) > 0:
+		return list(set(p)) # Get unique elements
+	
+	# No results yet: try splitting the query and check for name pieces
+	substr = query.split()
+	for s in substr:
+		p.extend(Participant.objects.filter(first_name__icontains=s)) # icontains: contains (substring) case insensitive
+		p.extend(Participant.objects.filter(last_name__icontains=s))
+	
+	return list(set(p)) # Get unique elements
+
 PARTICIPATIONS = [
 	[0, 'Mattina'],
 	[1, 'Pomeriggio'],
 	[2, 'Mattina e pomeriggio'],
 ]
-# Campi del form di registrazione
+
+# Registration form fields
 class RegistrationForm(forms.Form):
 	first_name = forms.CharField(label='Nome*', max_length=128, required=True)
 	last_name = forms.CharField(label='Cognome*', max_length=128, required=True)
@@ -128,7 +155,7 @@ class RegistrationForm(forms.Form):
 	comments = forms.CharField(label='Commenti', max_length=512, widget=forms.Textarea, required=False)
 	mailing_list = forms.BooleanField(label='Consenti di ricevere email riguardanti il Linux Day come variazioni sul programma o eventi speciali.', initial=True, required=False)
 
-# Campi del form di registrazione
+# Registration form fields for administrators
 class AdminRegistrationForm(forms.Form):
 	first_name = forms.CharField(label='Nome*', max_length=128, required=True)
 	last_name = forms.CharField(label='Cognome*', max_length=128, required=True)
@@ -306,6 +333,17 @@ def checked_in(request):
 			'registration_date',
 			'mailing_list').order_by('last_name')
 	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Persone già presenti all\'evento'})
+
+@require_http_methods(['GET',])
+@login_required
+def query_search(request):
+	participants = []
+	
+	query = request.GET.get('q')
+	if query:
+		participants = do_search(query)
+	
+	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Risultati della ricerca'})
 
 @require_http_methods(['GET',])
 @login_required

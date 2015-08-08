@@ -29,3 +29,8 @@ div.comment {
 div.scroll {
 	overflow: auto;
 }
+@media all and (max-width: 767px) {
+    #header {
+        display:none;
+    }
+}

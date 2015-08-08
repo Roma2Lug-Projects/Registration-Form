@@ -19,6 +19,7 @@ urlpatterns = patterns('',
 	url(r'^participants/details$', views.participant_details, name='participant_details'),
 	url(r'^emails$', views.email_sender, name='email_sender'),
 	url(r'^registration$', views.admin_form, name='admin_form'),
+	url(r'^query$', views.query_search, name='query_search'),
 	
 	# REST interfaces
 	url(r'^rest/$', views.RESTParticipantList.as_view(), name='rest_list'),
