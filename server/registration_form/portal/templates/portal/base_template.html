@@ -34,15 +34,6 @@
           <a class="navbar-brand" href="{% url 'portal:index' %}">Linux Day 2015</a> <!-- Site title -->
         </div>
         <div id="navbar" class="navbar-collapse collapse">
-		
-		<!-- Left side -->
-		<ul class="nav navbar-nav">
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">REST Interface <span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
-              </ul>
-            </li>
-          </ul>
           
           <!-- Right side (account management) -->
           <ul class="nav navbar-nav navbar-right">
@@ -56,6 +47,7 @@
                 <li class="divider"></li>
 	{% endif %}
                 <li class="dropdown-header">Gestione</li>
+				<li><a href="{% url 'portal:admin_form' %}">Registra nuovi utenti</a></li>
 				<li><a href="{% url 'portal:email_sender' %}?id=all">Invia email</a></li>
                 <li class="divider"></li>
 				<li><a href="{% url 'portal:logout' %}">Scollegati</a></li>

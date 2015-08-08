@@ -18,6 +18,7 @@ urlpatterns = patterns('',
 	url(r'^participants/checked_in$', views.checked_in, name='checked_in'),
 	url(r'^participants/details$', views.participant_details, name='participant_details'),
 	url(r'^emails$', views.email_sender, name='email_sender'),
+	url(r'^registration$', views.admin_form, name='admin_form'),
 	
 	# REST interfaces
 	url(r'^rest/$', views.RESTParticipantList.as_view(), name='rest_list'),

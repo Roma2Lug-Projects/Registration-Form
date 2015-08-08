@@ -18,6 +18,7 @@ from django.utils.crypto import get_random_string
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.http import Http404
+from django.core import validators
 
 # Authentication
 import django.contrib.auth
@@ -43,8 +44,8 @@ from portal.serializers import ParticipantSerializer
 
 
 # Change this if you want to enable/disable emails service
-#DISABLE_EMAIL = settings.DEBUG
-DISABLE_EMAIL = False
+DISABLE_EMAIL = settings.DEBUG
+#DISABLE_EMAIL = False
 
 
 
@@ -67,32 +68,33 @@ def send_registration_email(participant):
 	img.save(img_stream, 'PNG')
 	
 	# Compose email
-	subject = 'ID registrazione Linux Day Roma 2014'
+	subject = 'ID registrazione Linux Day Roma 2015'
 	from_email = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
+	to_email = str(participant) + ' <' + participant.email + '>'
 	
 	text = 'Caro ' + participant.first_name + ',\n'
 	text += 'grazie per esserti iscritto al nostro Linux Day.\n'
-	text += 'Ti preghiamo di conservare questa email come promemoria e di presentarla all\'ingresso.\n\n'
+	text += 'Ti preghiamo di conservare questa email come promemoria e di mostrarla quando ti verra\' richiesto.\n\n'
 	text += 'Linux Day Roma\n'
-	text += '25 Ottobre 2014\n'
+	text += '24 Ottobre 2015\n'
 	text += 'Facolta\' di Ingegneria, Universita\' Tor Vergata\n'
 	text += 'Via del Politecnico 1, edificio della Didattica.\n'
 	text += 'ID registrazione: ' + str(participant.participant_id) + '\n\n'
-	text += 'A presto,\nRoma2LUG.\n'
+	text += 'A presto,\nRoma2LUG e LugRoma3.\n'
 	
 	html = '<p>Caro ' + participant.first_name + ',<br />\n'
 	html += 'grazie per esserti iscritto al nostro Linux Day.<br />\n'
-	html += 'Ti preghiamo di conservare questa email come promemoria e di presentarla all\'ingresso.</p>\n'
-	html += '<p>Linux Day Roma<br />\n'
-	html += '25 Ottobre 2014<br />\n'
+	html += 'Ti preghiamo di conservare questa email come promemoria e di mostrarla quando ti verra\' richiesto.</p>\n'
+	html += '<p><a href="http://lug.uniroma2.it/ld15/">Linux Day Roma</a><br />\n'
+	html += '24 Ottobre 2015<br />\n'
 	html += 'Facolta\' di Ingegneria, Universita\' Tor Vergata<br />\n'
 	html += 'Via del Politecnico 1, edificio della Didattica.<br /></p>\n'
 	html += '<p>ID registrazione: <b>' + str(participant.participant_id) + '</b><br />\n'
 	html += '<img src="cid:qrcode"></p>\n'
-	html += '<p>A presto,<br />Roma2LUG.</p>\n'
+	html += '<p>A presto,<br />Roma2LUG e LugRoma3.</p>\n'
 	
 	# Add content to email
-	mail = EmailMultiAlternatives(subject, text, from_email, [participant.email])
+	mail = EmailMultiAlternatives(subject, text, from_email, [to_email,])
 	mail.attach_alternative(html, 'text/html')
 	image = MIMEImage(img_stream.getvalue(), 'png')
 	image.add_header('Content-ID', '<qrcode>') # This is the ID used in tag <img> for HTML part of the email
@@ -124,6 +126,13 @@ class RegistrationForm(forms.Form):
 	participates = forms.ChoiceField(label='Partecipazione', choices=PARTICIPATIONS, required=False)
 	comments = forms.CharField(label='Commenti', max_length=512, widget=forms.Textarea, required=False)
 	mailing_list = forms.BooleanField(label='Consenti di ricevere email riguardanti il Linux Day come variazioni sul programma o eventi speciali.', initial=True, required=False)
+
+# Campi del form di registrazione
+class AdminRegistrationForm(forms.Form):
+	first_name = forms.CharField(label='Nome*', max_length=128, required=True)
+	last_name = forms.CharField(label='Cognome*', max_length=128, required=True)
+	email = forms.EmailField(label='Email*', required=True)
+	mailing_list = forms.BooleanField(label='Consenti di ricevere email riguardanti il Linux Day.', initial=True, required=False)
 
 
 
@@ -176,34 +185,36 @@ def index(request):
 			reg_id = participant_id
 			name = p.first_name
 			return render(request, 'portal/result.html', {'reg_id': reg_id, 'name': name})
+		else:
+			return render(request, 'portal/index.html', {'form': form})
 
 	else:
 		# This is a GET HTTP request
-		content = {}
+		context = {}
 		
 		if request.user.is_authenticated():
 			# Show a page summary
 			registered_users = Participant.objects.count()
-			content['registered_users'] = registered_users
+			context['registered_users'] = registered_users
 			
 			morning_users = Participant.objects.filter(participate_morning=True).count()
-			content['morning_users'] = morning_users
+			context['morning_users'] = morning_users
 			
 			afternoon_users = Participant.objects.filter(participate_afternoon=True).count()
-			content['afternoon_users'] = afternoon_users
+			context['afternoon_users'] = afternoon_users
 			
 			mailable_users = Participant.objects.filter(mailing_list=True).count()
-			content['mailable_users'] = mailable_users
+			context['mailable_users'] = mailable_users
 			
 			seen_users = Participant.objects.filter(check_in__isnull=False).count()
-			content['seen_users'] = seen_users
+			context['seen_users'] = seen_users
 		
 		else:
 			# Show the registration form
 			form = RegistrationForm()
-			content['form'] = form
+			context['form'] = form
 		
-		return render(request, 'portal/index.html', content)
+		return render(request, 'portal/index.html', context)
 
 @require_http_methods(['GET',])
 @login_required
@@ -299,16 +310,16 @@ def email_sender(request):
 		if not (participant_id == 'all' or Participant.objects.filter(mailing_list=True, participant_id=participant_id).exists()):
 			raise Http404('ID non valido')
 		
-		content = {'participant_id': participant_id,
+		context = {'participant_id': participant_id,
 				'from': settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'}
 		
 		if participant_id == 'all':
-			content['to'] = str(Participant.objects.filter(mailing_list=True).count()) + ' partecipanti'
+			context['to'] = str(Participant.objects.filter(mailing_list=True).count()) + ' partecipanti'
 		else:
 			participant = Participant.objects.get(participant_id=participant_id)
-			content['to'] = str(participant)
+			context['to'] = str(participant)
 		
-		return render(request, 'portal/emails.html', content)
+		return render(request, 'portal/emails.html', context)
 	
 	else:
 		participant_id = request.POST['participant_id']
@@ -329,6 +340,48 @@ def email_sender(request):
 			print('Email disabled! No mail was sent.')
 		
 		return render(request, 'portal/emails.html', {'confirm_message': 'L\'email è stata inviata a ' + str(len(participants)) + ' partecipanti.'})
+
+@require_http_methods(['GET','POST'])
+@login_required
+def admin_form(request):
+	if request.method == 'GET':
+		# Show the registration form
+		form = AdminRegistrationForm()
+		return render(request, 'portal/admin_form.html', {'form': form})
+	
+	else:
+		form = AdminRegistrationForm(request.POST)
+
+		if form.is_valid():
+			participant_id = getUniqueParticipantID()
+			
+			p = Participant(
+							participant_id = participant_id,
+							first_name = form.cleaned_data['first_name'],
+							last_name = form.cleaned_data['last_name'],
+							email = form.cleaned_data['email'],
+							mailing_list = form.cleaned_data['mailing_list'],
+							comments = 'Registrato durante l\'evento dall\'utente ' + str(request.user) + '.',
+							participate_morning = True,
+							participate_afternoon = True,
+							check_in = datetime.now(),
+			)
+			try:
+				p.save()
+			except IntegrityError as e:
+				return render(request, 'portal/admin_form.html', {'form': form, 'error_message': 'L\'email usata sembra essere già presente nel sistema.'})
+			
+			# Send the email
+			if not DISABLE_EMAIL:
+				t = threading.Thread(target=send_registration_email, args=(p,))
+				t.start()
+			else:
+				print('Email disabled! No mail was sent to new registered user "' + form.cleaned_data['first_name'] + '".')
+			
+			form = AdminRegistrationForm()
+			return render(request, 'portal/admin_form.html', {'form': form, 'confirm_message': 'Utente registrato con successo.'})
+		else:
+			return render(request, 'portal/admin_form.html', {'form': form})
 
 
 
@@ -376,11 +429,11 @@ def login(request):
 				
 		else:
 			# Invalid credential
-			content = {
+			context = {
 						'error_message': 'Errore di autenticazione!',
 						'username': username
 			}
-			return render(request, 'portal/login.html', content)
+			return render(request, 'portal/login.html', context)
 
 def logout(request):
 	if request.user.is_authenticated():

@@ -1,0 +1,43 @@
+{% extends 'portal/base_template.html' %}
+{% load staticfiles %}
+{% load bootstrap %}
+
+{% block description %}Linux Day{% endblock %}
+{% block title %}Pagina di registrazione{% endblock %}
+{% block content %}
+		
+		<form class="form-horizontal" method="post" action="{% url 'portal:admin_form' %}">
+			<legend>Modulo di registrazione. Informaci della tua presenza!</legend>
+			{% csrf_token %}
+
+			{% if error_message %}
+			<div class="row">
+				<div class="col-sm-10 col-lg-10 col-sm-offset-2">
+					<div class="alert alert-warning alert-dismissible" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Chiudi"><span aria-hidden="true">&times;</span></button>
+						{{ error_message }}
+					</div>
+				</div>
+			</div>
+			{% endif %}
+
+			{% if confirm_message %}
+			<div class="row">
+				<div class="col-sm-10 col-lg-10 col-sm-offset-2">
+					<div class="alert alert-success alert-dismissible" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Chiudi"><span aria-hidden="true">&times;</span></button>
+						{{ confirm_message }}
+					</div>
+				</div>
+			</div>
+			{% endif %}
+			
+			{{ form|bootstrap_horizontal }}
+			<div class="row">
+				<div class="col-sm-10 col-sm-offset-2">
+					<button type="submit" class="btn btn-primary btn-block">Registra</button>
+				</div>
+			</div>
+		</form>
+		
+{% endblock %}
