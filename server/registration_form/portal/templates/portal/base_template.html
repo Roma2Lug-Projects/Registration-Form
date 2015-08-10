@@ -50,6 +50,7 @@
               </ul>
             </li>
           </ul>
+{% if user.is_authenticated %}
 		  <div class="col-sm-3 col-md-3">
 			<form class="navbar-form" role="search" method="get" action="{% url 'portal:query_search' %}">
 			<div class="input-group">
@@ -60,6 +61,7 @@
 			</div>
 			</form>
 		  </div>
+{% endif %}
           
           <!-- Right side -->
           <ul class="nav navbar-nav navbar-right">
