@@ -39,7 +39,7 @@ from io import BytesIO
 
 # Model
 from django.db import IntegrityError
-from portal.models import Participant, AdminProperties
+from portal.models import Participant, AdminProperty, Assistance
 from portal.serializers import ParticipantSerializer
 
 
@@ -162,14 +162,114 @@ class AdminRegistrationForm(forms.Form):
 	email = forms.EmailField(label='Email*', required=True)
 	mailing_list = forms.BooleanField(label='Consenti di ricevere email riguardanti il Linux Day.', initial=True, required=False)
 
+# Registration form fields for assistance requests
+class AssistanceForm(forms.Form):
+	email = forms.EmailField(label='Email*', help_text='Deve corrispondere a quella utilizzata in fase di registrazione.', required=True)
+	pc_type = forms.ChoiceField(label='Tipo di computer*', choices=Assistance.PC_TYPES)
+	brand = forms.CharField(label='Marca*', max_length=32, required=True)
+	model = forms.CharField(label='Modello', max_length=32, required=False)
+	cpu = forms.CharField(label='Processore', max_length=32, required=False)
+	ram = forms.CharField(label='RAM', max_length=32, required=False)
+	problem = forms.CharField(label='Problema*', widget=forms.Textarea, required=True)
+	preferred_time = forms.TimeField(label='Orario preferito', help_text='Deve essere nella forma HH:mm:ss o HH:mm. In base alla disponibilità dei nostri collaboratori potrebbe non essere rispettato. Fa fede l\'orario che comparirà nell\'email di conferma.', required=False)
+
+def getBaseContext():
+	context = {}
+	
+	# Check if public form is disabled
+	if AdminProperty.objects.filter(key='disable_public_form', value='true').exists():
+		context['public_form_disabled'] = True
+	
+	if AdminProperty.objects.filter(key='disable_assistances', value='true').exists():
+		context['assistances_disabled'] = True
+	
+	return context
+
+def changeProperties(request):
+	# If requested to disable/enable the public form, change the object in the model
+	disable_form = request.GET.get('disable_form')
+	if disable_form:
+		if disable_form == 'true':
+			try:
+				prop = AdminProperty.objects.get(key='disable_public_form')
+				prop.value = 'true'
+			except ObjectDoesNotExist:
+				prop = AdminProperty(key='disable_public_form', value='true')
+			prop.save()
+		elif disable_form == 'false':
+			try:
+				prop = AdminProperty.objects.get(key='disable_public_form')
+				prop.value = 'false'
+			except ObjectDoesNotExist:
+				prop = AdminProperty(key='disable_public_form', value='false')
+			prop.save()
+			
+	# If requested to disable/enable the assistance form, change the object in the model
+	disable_assistances = request.GET.get('disable_assistances')
+	if disable_assistances:
+		if disable_assistances == 'true':
+			try:
+				prop = AdminProperty.objects.get(key='disable_assistances')
+				prop.value = 'true'
+			except ObjectDoesNotExist:
+				prop = AdminProperty(key='disable_assistances', value='true')
+			prop.save()
+		elif disable_assistances == 'false':
+			try:
+				prop = AdminProperty.objects.get(key='disable_assistances')
+				prop.value = 'false'
+			except ObjectDoesNotExist:
+				prop = AdminProperty(key='disable_assistances', value='false')
+			prop.save()
+
 
 
 # Views
 
 @require_http_methods(['GET', 'POST'])
 def index(request):
+	if request.method == 'GET':
+		if request.user.is_authenticated():
+			# Enable / disable forms according to arguments of the GET request
+			changeProperties(request)
+			
+			context = getBaseContext()
+			
+			# Populate the page summary
+			registered_users = Participant.objects.count()
+			context['registered_users'] = registered_users
+			
+			morning_users = Participant.objects.filter(participate_morning=True).count()
+			context['morning_users'] = morning_users
+			
+			afternoon_users = Participant.objects.filter(participate_afternoon=True).count()
+			context['afternoon_users'] = afternoon_users
+			
+			mailable_users = Participant.objects.filter(mailing_list=True).count()
+			context['mailable_users'] = mailable_users
+			
+			seen_users = Participant.objects.filter(check_in__isnull=False).count()
+			context['seen_users'] = seen_users
+			
+			pending_assistances = Assistance.objects.filter(acceptance__isnull=True).count()
+			context['pending_assistances'] = pending_assistances
+			
+			accepted_assistances = Assistance.objects.filter(acceptance=Assistance.ACCEPTED).count()
+			context['accepted_assistances'] = accepted_assistances
+			
+			not_accepted_assistances = Assistance.objects.filter(acceptance=Assistance.REFUSED).count()
+			context['refused_assistances'] = not_accepted_assistances
+		
+		else:
+			# User is anonymous: show the public registration form
+			form = RegistrationForm()
+			context = getBaseContext()
+			context['form'] = form
+		
+		return render(request, 'portal/index.html', context)
+	
 	# if this is a POST request we need to process the form data
-	if request.method == 'POST':
+	else:
 		# Create a form instance and populate it with data from the request:
 		form = RegistrationForm(request.POST)
 
@@ -201,7 +301,10 @@ def index(request):
 			try:
 				p.save()
 			except IntegrityError as e:
-				return render(request, 'portal/index.html', {'form': form, 'errors': True})
+				context = getBaseContext()
+				context['form'] = form
+				context['errors'] = True
+				return render(request, 'portal/index.html', context)
 			
 			# Send the email
 			if not DISABLE_EMAIL:
@@ -219,55 +322,6 @@ def index(request):
 			# Invalid form, an error will be shown
 			return render(request, 'portal/index.html', {'form': form})
 
-	else:
-		# This is a GET HTTP request
-		context = {}
-		
-		if request.user.is_authenticated():
-			# If requested to disable/enable the public form, change the object in the model
-			disable = request.GET.get('disable')
-			if disable:
-				if disable == 'true':
-					try:
-						prop = AdminProperties.objects.get(key='disable_public_form')
-						prop.value = 'true'
-					except ObjectDoesNotExist:
-						prop = AdminProperties(key='disable_public_form', value='true')
-					prop.save()
-				elif disable == 'false':
-					try:
-						prop = AdminProperties.objects.get(key='disable_public_form')
-						prop.value = 'false'
-					except ObjectDoesNotExist:
-						prop = AdminProperties(key='disable_public_form', value='false')
-					prop.save()
-			
-			# Populate the page summary
-			registered_users = Participant.objects.count()
-			context['registered_users'] = registered_users
-			
-			morning_users = Participant.objects.filter(participate_morning=True).count()
-			context['morning_users'] = morning_users
-			
-			afternoon_users = Participant.objects.filter(participate_afternoon=True).count()
-			context['afternoon_users'] = afternoon_users
-			
-			mailable_users = Participant.objects.filter(mailing_list=True).count()
-			context['mailable_users'] = mailable_users
-			
-			seen_users = Participant.objects.filter(check_in__isnull=False).count()
-			context['seen_users'] = seen_users
-		
-		else:
-			# User is anonymous: show the public registration form
-			form = RegistrationForm()
-			context['form'] = form
-		
-		# Check if public form is disabled
-		if AdminProperties.objects.filter(key='disable_public_form', value='true').exists():
-			context['disabled'] = True
-		
-		return render(request, 'portal/index.html', context)
 
 @require_http_methods(['GET',])
 @login_required
@@ -280,7 +334,12 @@ def participant_list(request):
 			'participate_afternoon',
 			'registration_date',
 			'mailing_list').order_by('last_name')
-	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista di tutte le persone iscritte'})
+	
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Lista di tutte le persone iscritte'
+	
+	return render(request, 'portal/participant_list.html', context)
 
 @require_http_methods(['GET',])
 @login_required
@@ -293,7 +352,12 @@ def morning_users(request):
 			'participate_afternoon',
 			'registration_date',
 			'mailing_list').order_by('last_name')
-	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista degli iscritti per la mattina'})
+	
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Lista degli iscritti per la mattina'
+	
+	return render(request, 'portal/participant_list.html', context)
 
 @require_http_methods(['GET',])
 @login_required
@@ -306,7 +370,12 @@ def afternoon_users(request):
 			'participate_afternoon',
 			'registration_date',
 			'mailing_list').order_by('last_name')
-	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista degli iscritti per il pomeriggio'})
+	
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Lista degli iscritti per il pomeriggio'
+	
+	return render(request, 'portal/participant_list.html', context)
 
 @require_http_methods(['GET',])
 @login_required
@@ -319,7 +388,12 @@ def mailing_list(request):
 			'participate_afternoon',
 			'registration_date',
 			'mailing_list').order_by('last_name')
-	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Lista delle persone autorizzate a ricevere email'})
+	
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Lista delle persone autorizzate a ricevere email'
+	
+	return render(request, 'portal/participant_list.html', context)
 
 @require_http_methods(['GET',])
 @login_required
@@ -332,7 +406,12 @@ def checked_in(request):
 			'participate_afternoon',
 			'registration_date',
 			'mailing_list').order_by('last_name')
-	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Persone già presenti all\'evento'})
+	
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Persone già presenti all\'evento'
+	
+	return render(request, 'portal/participant_list.html', context)
 
 @require_http_methods(['GET',])
 @login_required
@@ -343,7 +422,11 @@ def query_search(request):
 	if query:
 		participants = do_search(query)
 	
-	return render(request, 'portal/participant_list.html', {'participants': participants, 'message': 'Risultati della ricerca'})
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Risultati della ricerca'
+	
+	return render(request, 'portal/participant_list.html', context)
 
 @require_http_methods(['GET',])
 @login_required
@@ -362,7 +445,9 @@ def participant_details(request):
 			participant.check_in = None
 		participant.save()
 	
-	return render(request, 'portal/participant.html', {'p': participant})
+	context = getBaseContext()
+	context['p'] = participant
+	return render(request, 'portal/participant.html', context)
 
 @require_http_methods(['GET','POST'])
 @login_required
@@ -374,8 +459,9 @@ def email_sender(request):
 		if not (participant_id == 'all' or Participant.objects.filter(mailing_list=True, participant_id=participant_id).exists()):
 			raise Http404('ID non valido')
 		
-		context = {'participant_id': participant_id,
-				'from': settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'}
+		context = getBaseContext()
+		context['participant_id'] = participant_id
+		context['from'] = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
 		
 		if participant_id == 'all':
 			context['to'] = str(Participant.objects.filter(mailing_list=True).count()) + ' partecipanti'
@@ -403,7 +489,9 @@ def email_sender(request):
 		else:
 			print('Email disabled! No mail was sent.')
 		
-		return render(request, 'portal/emails.html', {'confirm_message': 'L\'email è stata inviata a ' + str(len(participants)) + ' partecipanti.'})
+		context = getBaseContext()
+		context['confirm_message'] = 'L\'email è stata inviata a ' + str(len(participants)) + ' partecipanti.'
+		return render(request, 'portal/emails.html', context)
 
 @require_http_methods(['GET','POST'])
 @login_required
@@ -433,7 +521,10 @@ def admin_form(request):
 			try:
 				p.save()
 			except IntegrityError as e:
-				return render(request, 'portal/admin_form.html', {'form': form, 'error_message': 'L\'email usata sembra essere già presente nel sistema.'})
+				context = getBaseContext()
+				context['form'] = form
+				context['error_message'] = 'L\'email usata sembra essere già presente nel sistema.'
+				return render(request, 'portal/admin_form.html', context)
 			
 			# Send the email
 			if not DISABLE_EMAIL:
@@ -443,9 +534,146 @@ def admin_form(request):
 				print('Email disabled! No mail was sent to new registered user "' + form.cleaned_data['first_name'] + '".')
 			
 			form = AdminRegistrationForm()
-			return render(request, 'portal/admin_form.html', {'form': form, 'confirm_message': 'Utente registrato con successo.'})
+			context = getBaseContext()
+			context['form'] = form
+			context['confirm_message'] = 'Utente registrato con successo.'
+			return render(request, 'portal/admin_form.html', context)
 		else:
-			return render(request, 'portal/admin_form.html', {'form': form})
+			context = getBaseContext()
+			context['form'] = form
+			return render(request, 'portal/admin_form.html', context)
+
+@require_http_methods(['GET','POST'])
+def assistance_form(request):
+	if request.method == 'GET':
+		form = AssistanceForm()
+		
+		context = getBaseContext()
+		context['form'] = form
+		
+		return render(request, 'portal/assistance_form.html', context)
+	
+	else:
+		form = AssistanceForm(request.POST)
+		
+		if form.is_valid():
+			email = form.cleaned_data['email']
+			try:
+				p = Participant.objects.get(email=email)
+			except ObjectDoesNotExist:
+				context = getBaseContext()
+				context['form'] = form
+				context['error_message'] = 'L\'indirizzo email non è stato trovato nel sistema, devi prima iscriverti all\'evento'
+				return render(request, 'portal/assistance_form.html', context)
+			if Assistance.objects.filter(participant=p).exists():
+				context = getBaseContext()
+				context['form'] = form
+				context['error_message'] = 'Hai già fatto una richiesta di assistenza. Per eventuali problemi contattaci all\'indirizzo roma2lug@gmail.com'
+				return render(request, 'portal/assistance_form.html', context)
+			
+			a = Assistance(
+					participant = p,
+					pc_type = form.cleaned_data['pc_type'],
+					brand = form.cleaned_data['brand'],
+					model = form.cleaned_data['model'],
+					cpu = form.cleaned_data['cpu'],
+					ram = form.cleaned_data['ram'],
+					problem = form.cleaned_data['problem'],
+					preferred_time = form.cleaned_data['preferred_time'],
+			)
+			try:
+				a.save()
+			except IntegrityError as e:
+				context = getBaseContext()
+				context['form'] = form
+				context['error_message'] = 'Si è verificato un errore nella richiesta, riprova o contattaci all\'indirizzo roma2lug@gmail.com'
+				return render(request, 'portal/assistance_form.html', context)
+			
+			context = getBaseContext()
+			context['form'] = form
+			context['confirm_message'] = 'La richiesta è stata inoltrata con successo. Riceverai un\'email di conferma quando verrà visionata dai nostri membri.'
+			return render(request, 'portal/assistance_form.html', context)
+			
+		else:
+			context = getBaseContext()
+			context['form'] = form
+			return render(request, 'portal/assistance_form.html', context)
+
+@require_http_methods(['GET',])
+@login_required
+def assistance_list(request):
+	assistances = Assistance.objects.values(
+			'participant__participant_id',
+			'participant__last_name',
+			'participant__first_name',
+			'pc_type',
+			'acceptance',
+			'accepted_time',
+			'estimated_mttr').order_by('participant__last_name',)
+	
+	context = getBaseContext()
+	context['assistances'] = assistances
+	context['message'] = 'Lista di tutte le richieste di assistenza'
+	
+	# Filters are defined in templatetags/portal_filters.py
+	return render(request, 'portal/assistance_list.html', context)
+
+@require_http_methods(['GET',])
+@login_required
+def pending_assistances(request):
+	assistances = Assistance.objects.filter(acceptance__isnull=True).values(
+			'participant__participant_id',
+			'participant__last_name',
+			'participant__first_name',
+			'pc_type',
+			'acceptance',
+			'accepted_time',
+			'estimated_mttr').order_by('participant__last_name',)
+	
+	context = getBaseContext()
+	context['assistances'] = assistances
+	context['message'] = 'Lista delle richieste di assistenza pendenti'
+	
+	# Filters are defined in templatetags/portal_filters.py
+	return render(request, 'portal/assistance_list.html', context)
+
+@require_http_methods(['GET',])
+@login_required
+def accepted_assistances(request):
+	assistances = Assistance.objects.filter(acceptance=Assistance.ACCEPTED).values(
+			'participant__participant_id',
+			'participant__last_name',
+			'participant__first_name',
+			'pc_type',
+			'acceptance',
+			'accepted_time',
+			'estimated_mttr').order_by('participant__last_name',)
+	
+	context = getBaseContext()
+	context['assistances'] = assistances
+	context['message'] = 'Lista delle richieste di assistenza accettate'
+	
+	# Filters are defined in templatetags/portal_filters.py
+	return render(request, 'portal/assistance_list.html', context)
+
+@require_http_methods(['GET',])
+@login_required
+def refused_assistances(request):
+	assistances = Assistance.objects.filter(acceptance=Assistance.REFUSED).values(
+			'participant__participant_id',
+			'participant__last_name',
+			'participant__first_name',
+			'pc_type',
+			'acceptance',
+			'accepted_time',
+			'estimated_mttr').order_by('participant__last_name',)
+	
+	context = getBaseContext()
+	context['assistances'] = assistances
+	context['message'] = 'Lista delle richieste di assistenza rifiutate'
+	
+	# Filters are defined in templatetags/portal_filters.py
+	return render(request, 'portal/assistance_list.html', context)
 
 
 

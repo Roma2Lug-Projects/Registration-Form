@@ -25,7 +25,43 @@ class Participant(models.Model):
 	def __str__(self):
 		return str(self.first_name) + ' ' + str(self.last_name)
 
-class AdminProperties(models.Model):
+class Assistance(models.Model):
+	PC_DESKTOP = 'dt'
+	PC_LAPTOP = 'lt'
+	PC_CHROMEBOOK = 'cb'
+	PC_TRANSFORMER = 'tf'
+	PC_OTHER = 'oo'
+	PC_TYPES = (
+			(PC_DESKTOP, 'Fisso'),
+			(PC_LAPTOP, 'Portatile generico'),
+			(PC_CHROMEBOOK, 'Chromebook'),
+			(PC_TRANSFORMER, 'Trasformabile (con touchscreen)'),
+	)
+	
+	REFUSED = '0'
+	ACCEPTED = '1'
+	STATUS = (
+			(REFUSED, 'Rifiutata'),
+			(ACCEPTED, 'Accettata'),
+	)
+	participant = models.OneToOneField(Participant, primary_key=True)
+	pc_type = models.CharField(max_length=2, choices=PC_TYPES, default=PC_LAPTOP)
+	brand = models.CharField(max_length=32)
+	model = models.CharField(max_length=32, blank=True, null=True)
+	cpu = models.CharField(max_length=32, blank=True, null=True)
+	ram = models.CharField(max_length=32, blank=True, null=True)
+	
+	problem = models.TextField()
+	
+	preferred_time = models.TimeField(blank=True, null=True)
+	acceptance = models.CharField(max_length=1, choices=STATUS, blank=True, null=True)
+	accepted_time = models.TimeField(blank=True, null=True)
+	estimated_mttr = models.DurationField(blank=True, null=True)
+	
+	def __str__(self):
+		return 'Assistenza per ' + str(self.participant.first_name) + ' ' + str(self.participant.last_name)
+
+class AdminProperty(models.Model):
 	key = models.CharField(max_length=32, primary_key=True)
 	value = models.CharField(max_length=32)
 	

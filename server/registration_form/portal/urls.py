@@ -20,6 +20,11 @@ urlpatterns = patterns('',
 	url(r'^emails$', views.email_sender, name='email_sender'),
 	url(r'^registration$', views.admin_form, name='admin_form'),
 	url(r'^query$', views.query_search, name='query_search'),
+	url(r'^assistance_form$', views.assistance_form, name='assistance_form'),
+	url(r'^assistances$', views.assistance_list, name='assistance_list'),
+	url(r'^assistances/pending$', views.pending_assistances, name='pending_assistances'),
+	url(r'^assistances/accepted$', views.accepted_assistances, name='accepted_assistances'),
+	url(r'^assistances/refused$', views.refused_assistances, name='refused_assistances'),
 	
 	# REST interfaces
 	url(r'^rest/$', views.RESTParticipantList.as_view(), name='rest_list'),

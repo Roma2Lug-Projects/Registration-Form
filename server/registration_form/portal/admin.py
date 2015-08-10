@@ -4,9 +4,9 @@
 # ----------------------------------------------------------------------- #
 
 from django.contrib import admin
-from portal.models import Participant, AdminProperties
+from portal.models import Participant, AdminProperty, Assistance
 
-# Register your models here.
+
 
 class ParticipantAdmin(admin.ModelAdmin):
 	fieldsets = [
@@ -37,7 +37,30 @@ admin.site.register(Participant, ParticipantAdmin)
 
 
 
-class PropertiesAdmin(admin.ModelAdmin):
+class AssistanceAdmin(admin.ModelAdmin):
+	fieldsets = [
+		('Participant',		{'fields': ['participant']}),
+		('PC info',			{'fields': ['pc_type', 'brand', 'model', 'cpu', 'ram', 'problem']}),
+		('Time',			{'fields': ['preferred_time', 'acceptance', 'accepted_time', 'estimated_mttr']}),
+	]
+	
+	list_display = [
+		'participant',
+		'pc_type',
+		'problem',
+		'acceptance',
+		'accepted_time',
+		'estimated_mttr',]
+	
+	list_filter = ['pc_type', 'acceptance']
+	search_fields = ['participant']
+	ordering = ['participant', 'accepted_time',]
+
+admin.site.register(Assistance, AssistanceAdmin)
+
+
+
+class PropertyAdmin(admin.ModelAdmin):
 	fieldsets = [
 		(None,		{'fields': ['key', 'value']}),
 	]
@@ -50,4 +73,4 @@ class PropertiesAdmin(admin.ModelAdmin):
 	ordering = ['key',]
 
 
-admin.site.register(AdminProperties, PropertiesAdmin)
+admin.site.register(AdminProperty, PropertyAdmin)

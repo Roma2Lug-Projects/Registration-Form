@@ -45,7 +45,7 @@
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Registrazioni <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
-				<li><a href="#">Prenotazione assistenza</a></li>
+				<li><a href="{% url 'portal:assistance_form' %}">Prenotazione assistenza</a></li>
 				<li><a href="#">Prenotazione olimpiadi</a></li>
               </ul>
             </li>
@@ -75,11 +75,16 @@
                 <li class="divider"></li>
 	{% endif %}
                 <li class="dropdown-header">Gestione</li>
-                {% if disabled %}
-                <li><a href="{% url 'portal:index' %}?disable=false"><b>Abilita reg. pubblica</b></a></li>
-                {% else %}
-				<li><a href="{% url 'portal:index' %}?disable=true">Disabilita reg. pubblica</a></li>
-				{% endif %}
+            {% if public_form_disabled %}
+                <li><a href="{% url 'portal:index' %}?disable_form=false"><b>Abilita reg. pubblica</b></a></li>
+            {% else %}
+				<li><a href="{% url 'portal:index' %}?disable_form=true">Disabilita reg. pubblica</a></li>
+			{% endif %}
+            {% if assistances_disabled %}
+                <li><a href="{% url 'portal:index' %}?disable_assistances=false"><b>Abilita pren. assistenze</b></a></li>
+            {% else %}
+				<li><a href="{% url 'portal:index' %}?disable_assistances=true">Disabilita pren. assistenze</a></li>
+			{% endif %}
 				<li><a href="{% url 'portal:admin_form' %}">Registra nuovi utenti</a></li>
 				<li><a href="{% url 'portal:email_sender' %}?id=all">Invia email</a></li>
                 <li class="divider"></li>
