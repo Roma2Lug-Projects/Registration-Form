@@ -35,7 +35,7 @@
 							<th><b>Data registrazione</b>:</th><th>{{ p.registration_date }}</th>
 						</tr>
 						<tr>
-							<th><b>Orario check-in</b>:</th><th>{% if not p.check_in %}<a href="{% url 'portal:participant_details' %}?id={{ p.participant_id }}&do_checkin=true">Fai check-in ora</a>{% else %}{{ p.check_in }} <a href="{% url 'portal:participant_details' %}?id={{ p.participant_id }}&do_checkin=false">annulla</a>{% endif %}</th>
+							<th><b>Orario check-in</b>:</th><th>{% if not p.check_in %}<a href="{% url 'portal:participant_details' participant_id=p.participant_id %}?do_checkin=true">Fai check-in ora</a>{% else %}{{ p.check_in }} <a href="{% url 'portal:participant_details' participant_id=p.participant_id %}?do_checkin=false">annulla</a>{% endif %}</th>
 						</tr>
 						<tr>
 							<th><b>Commenti</b>:</th><th>{{ p.comments }}</th>

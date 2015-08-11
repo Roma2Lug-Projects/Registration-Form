@@ -29,7 +29,7 @@ from rest_framework import generics
 from rest_framework import permissions
 
 # Email
-from django.core.mail import EmailMultiAlternatives, send_mass_mail
+from django.core.mail import EmailMultiAlternatives, send_mass_mail, send_mail
 from email.mime.image import MIMEImage
 
 # QR Code
@@ -42,13 +42,13 @@ from django.db import IntegrityError
 from portal.models import Participant, AdminProperty, Assistance
 from portal.serializers import ParticipantSerializer
 
-
+#####################################################################################################
 
 # Change this if you want to enable/disable emails service
 DISABLE_EMAIL = settings.DEBUG
 #DISABLE_EMAIL = False
 
-
+#####################################################################################################
 
 # Support functions and classes
 
@@ -102,6 +102,39 @@ def send_registration_email(participant):
 	mail.attach(image)
 	
 	mail.send(fail_silently=True)
+
+def send_assistance_email(assistance):
+	# Compose email
+	subject = 'Linux Day 2015: aggiornamento stato richiesta di assistenza'
+	from_email = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
+	to_email = str(assistance.participant) + ' <' + assistance.participant.email + '>'
+	
+	status = '--'
+	for s in Assistance.STATUS:
+		if s[0] == assistance.acceptance:
+			status = s[1]
+	
+	text = 'Caro ' + assistance.participant.first_name + ',\n'
+	text += 'ti informiamo che la tua richiesta di assistenza ha cambiato stato ed è stata ' + status + '.\n'
+	if assistance.acceptance == Assistance.ACCEPTED:
+		text += 'L\'appuntamento è stato fissato per le ' + assistance.accepted_time + '.\n'
+		text += 'Ricordati di presentare la tua email di registrazione all\'ingresso e di nuovo al banchetto assistenze.\n\n'
+	else:
+		text += 'Per avere maggiori informazioni sul perché, contattaci all\'indirizzo roma2lug@gmail.com\n'
+		text += 'specificando il tuo ID  di registrazione: ' + assistance.participant.participant_id + '.\n\n'
+	text += 'A presto,\nRoma2LUG e LugRoma3.\n'
+	
+	html = '<p>Caro ' + assistance.participant.first_name + ',<br />\n'
+	html += 'ti informiamo che la tua richiesta di assistenza ha cambiato stato ed è stata <b>' + status + '</b>.<br />\n'
+	if assistance.acceptance == Assistance.ACCEPTED:
+		html += 'L\'appuntamento è stato fissato per le ' + assistance.accepted_time + '.<br />\n'
+		html += 'Ricordati di presentare la tua email di registrazione all\'ingresso e di nuovo al banchetto assistenze.</p>\n'
+	else:
+		html += 'Per avere maggiori informazioni sul perché, contattaci all\'indirizzo roma2lug@gmail.com<br />\n'
+		html += 'comunicando il tuo ID di registrazione: <b>' + assistance.participant.participant_id + '</b>.</p>\n'
+	html += '<p>A presto,<br />Roma2LUG e LugRoma3.</p>\n'
+	
+	send_mail(subject, text, from_email, [to_email,], fail_silently=True, html_message=html)
 
 # Send a generic email to participant(s)
 def send_email(participants, subject, message):
@@ -171,8 +204,9 @@ class AssistanceForm(forms.Form):
 	cpu = forms.CharField(label='Processore', max_length=32, required=False)
 	ram = forms.CharField(label='RAM', max_length=32, required=False)
 	problem = forms.CharField(label='Problema*', widget=forms.Textarea, required=True)
-	preferred_time = forms.TimeField(label='Orario preferito', help_text='Deve essere nella forma HH:mm:ss o HH:mm. In base alla disponibilità dei nostri collaboratori potrebbe non essere rispettato. Fa fede l\'orario che comparirà nell\'email di conferma.', required=False)
+	preferred_time = forms.TimeField(label='Orario preferito', help_text='Deve essere nella forma HH:mm. In base alla disponibilità dei nostri collaboratori potrebbe non essere rispettato. Fa fede l\'orario che comparirà nell\'email di conferma.', required=False)
 
+# Basic objects that every template must have
 def getBaseContext():
 	context = {}
 	
@@ -222,7 +256,7 @@ def changeProperties(request):
 				prop = AdminProperty(key='disable_assistances', value='false')
 			prop.save()
 
-
+#####################################################################################################
 
 # Views
 
@@ -322,180 +356,11 @@ def index(request):
 			# Invalid form, an error will be shown
 			return render(request, 'portal/index.html', {'form': form})
 
-
-@require_http_methods(['GET',])
-@login_required
-def participant_list(request):
-	participants = Participant.objects.values(
-			'participant_id',
-			'last_name',
-			'first_name',
-			'participate_morning',
-			'participate_afternoon',
-			'registration_date',
-			'mailing_list').order_by('last_name')
-	
-	context = getBaseContext()
-	context['participants'] = participants
-	context['message'] = 'Lista di tutte le persone iscritte'
-	
-	return render(request, 'portal/participant_list.html', context)
-
-@require_http_methods(['GET',])
-@login_required
-def morning_users(request):
-	participants = Participant.objects.filter(participate_morning=True).values(
-			'participant_id',
-			'last_name',
-			'first_name',
-			'participate_morning',
-			'participate_afternoon',
-			'registration_date',
-			'mailing_list').order_by('last_name')
-	
-	context = getBaseContext()
-	context['participants'] = participants
-	context['message'] = 'Lista degli iscritti per la mattina'
-	
-	return render(request, 'portal/participant_list.html', context)
-
-@require_http_methods(['GET',])
-@login_required
-def afternoon_users(request):
-	participants = Participant.objects.filter(participate_afternoon=True).values(
-			'participant_id',
-			'last_name',
-			'first_name',
-			'participate_morning',
-			'participate_afternoon',
-			'registration_date',
-			'mailing_list').order_by('last_name')
-	
-	context = getBaseContext()
-	context['participants'] = participants
-	context['message'] = 'Lista degli iscritti per il pomeriggio'
-	
-	return render(request, 'portal/participant_list.html', context)
-
-@require_http_methods(['GET',])
-@login_required
-def mailing_list(request):
-	participants = Participant.objects.filter(mailing_list=True).values(
-			'participant_id',
-			'last_name',
-			'first_name',
-			'participate_morning',
-			'participate_afternoon',
-			'registration_date',
-			'mailing_list').order_by('last_name')
-	
-	context = getBaseContext()
-	context['participants'] = participants
-	context['message'] = 'Lista delle persone autorizzate a ricevere email'
-	
-	return render(request, 'portal/participant_list.html', context)
-
-@require_http_methods(['GET',])
-@login_required
-def checked_in(request):
-	participants = Participant.objects.filter(check_in__isnull=False).values(
-			'participant_id',
-			'last_name',
-			'first_name',
-			'participate_morning',
-			'participate_afternoon',
-			'registration_date',
-			'mailing_list').order_by('last_name')
-	
-	context = getBaseContext()
-	context['participants'] = participants
-	context['message'] = 'Persone già presenti all\'evento'
-	
-	return render(request, 'portal/participant_list.html', context)
-
-@require_http_methods(['GET',])
-@login_required
-def query_search(request):
-	participants = []
-	
-	query = request.GET.get('q')
-	if query:
-		participants = do_search(query)
-	
-	context = getBaseContext()
-	context['participants'] = participants
-	context['message'] = 'Risultati della ricerca'
-	
-	return render(request, 'portal/participant_list.html', context)
-
-@require_http_methods(['GET',])
-@login_required
-def participant_details(request):
-	participant_id = request.GET.get('id')
-	if not participant_id:
-		raise Http404('Non è stato richiesto nessun ID')
-	
-	participant = get_object_or_404(Participant, participant_id=participant_id)
-	
-	do_checkin = request.GET.get('do_checkin')
-	if do_checkin:
-		if do_checkin == 'true':
-			participant.check_in = datetime.now()
-		elif do_checkin == 'false':
-			participant.check_in = None
-		participant.save()
-	
-	context = getBaseContext()
-	context['p'] = participant
-	return render(request, 'portal/participant.html', context)
-
-@require_http_methods(['GET','POST'])
-@login_required
-def email_sender(request):
-	if request.method == 'GET':
-		participant_id = request.GET.get('id')
-		if not participant_id:
-			raise Http404('Non è stato richiesto nessun ID')
-		if not (participant_id == 'all' or Participant.objects.filter(mailing_list=True, participant_id=participant_id).exists()):
-			raise Http404('ID non valido')
-		
-		context = getBaseContext()
-		context['participant_id'] = participant_id
-		context['from'] = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
-		
-		if participant_id == 'all':
-			context['to'] = str(Participant.objects.filter(mailing_list=True).count()) + ' partecipanti'
-		else:
-			participant = Participant.objects.get(participant_id=participant_id)
-			context['to'] = str(participant)
-		
-		return render(request, 'portal/emails.html', context)
-	
-	else:
-		participant_id = request.POST['participant_id']
-		subject = request.POST['subject']
-		message = request.POST['message']
-		
-		if participant_id == 'all':
-			participants = Participant.objects.filter(mailing_list=True)
-			
-		else:
-			participants = Participant.objects.filter(mailing_list=True, participant_id=participant_id)
-		
-		# Send the email
-		if not DISABLE_EMAIL:
-			t = threading.Thread(target=send_email, args=(participants, subject, message))
-			t.start()
-		else:
-			print('Email disabled! No mail was sent.')
-		
-		context = getBaseContext()
-		context['confirm_message'] = 'L\'email è stata inviata a ' + str(len(participants)) + ' partecipanti.'
-		return render(request, 'portal/emails.html', context)
-
 @require_http_methods(['GET','POST'])
 @login_required
 def admin_form(request):
+	# Registration form for logged in users
+	
 	if request.method == 'GET':
 		# Show the registration form
 		form = AdminRegistrationForm()
@@ -543,8 +408,194 @@ def admin_form(request):
 			context['form'] = form
 			return render(request, 'portal/admin_form.html', context)
 
+# Participant views
+
+@require_http_methods(['GET',])
+@login_required
+def participant_list(request):
+	# List of all participants
+	
+	participants = Participant.objects.values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'participate_morning',
+			'participate_afternoon',
+			'registration_date',
+			'mailing_list').order_by('last_name')
+	
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Lista di tutte le persone iscritte'
+	
+	return render(request, 'portal/participant_list.html', context)
+
+@require_http_methods(['GET',])
+@login_required
+def morning_users(request):
+	# List of participants that should be present in the morning
+	
+	participants = Participant.objects.filter(participate_morning=True).values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'participate_morning',
+			'participate_afternoon',
+			'registration_date',
+			'mailing_list').order_by('last_name')
+	
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Lista degli iscritti per la mattina'
+	
+	return render(request, 'portal/participant_list.html', context)
+
+@require_http_methods(['GET',])
+@login_required
+def afternoon_users(request):
+	# List of participants that should be present in the afternoon
+	
+	participants = Participant.objects.filter(participate_afternoon=True).values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'participate_morning',
+			'participate_afternoon',
+			'registration_date',
+			'mailing_list').order_by('last_name')
+	
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Lista degli iscritti per il pomeriggio'
+	
+	return render(request, 'portal/participant_list.html', context)
+
+@require_http_methods(['GET',])
+@login_required
+def mailing_list(request):
+	# List of participants that allow to receive emails
+	
+	participants = Participant.objects.filter(mailing_list=True).values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'participate_morning',
+			'participate_afternoon',
+			'registration_date',
+			'mailing_list').order_by('last_name')
+	
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Lista delle persone autorizzate a ricevere email'
+	
+	return render(request, 'portal/participant_list.html', context)
+
+@require_http_methods(['GET',])
+@login_required
+def checked_in(request):
+	# List of participants already present at the event
+	
+	participants = Participant.objects.filter(check_in__isnull=False).values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'participate_morning',
+			'participate_afternoon',
+			'registration_date',
+			'mailing_list').order_by('last_name')
+	
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Persone già presenti all\'evento'
+	
+	return render(request, 'portal/participant_list.html', context)
+
+@require_http_methods(['GET',])
+@login_required
+def participant_details(request, participant_id):
+	participant = get_object_or_404(Participant, participant_id=participant_id)
+	
+	do_checkin = request.GET.get('do_checkin')
+	if do_checkin:
+		if do_checkin == 'true':
+			participant.check_in = datetime.now()
+		elif do_checkin == 'false':
+			participant.check_in = None
+		participant.save()
+	
+	context = getBaseContext()
+	context['p'] = participant
+	return render(request, 'portal/participant.html', context)
+
+@require_http_methods(['GET',])
+@login_required
+def query_search(request):
+	# Search form for participants
+	
+	participants = []
+	
+	query = request.GET.get('q')
+	if query:
+		participants = do_search(query)
+	
+	context = getBaseContext()
+	context['participants'] = participants
+	context['message'] = 'Risultati della ricerca'
+	
+	return render(request, 'portal/participant_list.html', context)
+
+# Email management
+
+@require_http_methods(['GET','POST'])
+@login_required
+def email_sender(request):
+	if request.method == 'GET':
+		participant_id = request.GET.get('id')
+		if not participant_id:
+			raise Http404('Non è stato richiesto nessun ID')
+		if not (participant_id == 'all' or Participant.objects.filter(mailing_list=True, participant_id=participant_id).exists()):
+			raise Http404('ID non valido')
+		
+		context = getBaseContext()
+		context['participant_id'] = participant_id
+		context['from'] = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
+		
+		if participant_id == 'all':
+			context['to'] = str(Participant.objects.filter(mailing_list=True).count()) + ' partecipanti'
+		else:
+			participant = Participant.objects.get(participant_id=participant_id)
+			context['to'] = str(participant)
+		
+		return render(request, 'portal/emails.html', context)
+	
+	else:
+		participant_id = request.POST['participant_id']
+		subject = request.POST['subject']
+		message = request.POST['message']
+		
+		if participant_id == 'all':
+			participants = Participant.objects.filter(mailing_list=True)
+			
+		else:
+			participants = Participant.objects.filter(mailing_list=True, participant_id=participant_id)
+		
+		# Send the email
+		if not DISABLE_EMAIL:
+			t = threading.Thread(target=send_email, args=(participants, subject, message))
+			t.start()
+		else:
+			print('Email disabled! No mail was sent.')
+		
+		context = getBaseContext()
+		context['confirm_message'] = 'L\'email è stata inviata a ' + str(len(participants)) + ' partecipanti.'
+		return render(request, 'portal/emails.html', context)
+
+# Assistance views
+
 @require_http_methods(['GET','POST'])
 def assistance_form(request):
+	# Form for guest users
+	
 	if request.method == 'GET':
 		form = AssistanceForm()
 		
@@ -602,6 +653,8 @@ def assistance_form(request):
 @require_http_methods(['GET',])
 @login_required
 def assistance_list(request):
+	# All assistances
+	
 	assistances = Assistance.objects.values(
 			'participant__participant_id',
 			'participant__last_name',
@@ -621,6 +674,8 @@ def assistance_list(request):
 @require_http_methods(['GET',])
 @login_required
 def pending_assistances(request):
+	# Pending assistances
+	
 	assistances = Assistance.objects.filter(acceptance__isnull=True).values(
 			'participant__participant_id',
 			'participant__last_name',
@@ -640,6 +695,8 @@ def pending_assistances(request):
 @require_http_methods(['GET',])
 @login_required
 def accepted_assistances(request):
+	# Accepted assistances
+	
 	assistances = Assistance.objects.filter(acceptance=Assistance.ACCEPTED).values(
 			'participant__participant_id',
 			'participant__last_name',
@@ -659,6 +716,8 @@ def accepted_assistances(request):
 @require_http_methods(['GET',])
 @login_required
 def refused_assistances(request):
+	# Refused assistances
+	
 	assistances = Assistance.objects.filter(acceptance=Assistance.REFUSED).values(
 			'participant__participant_id',
 			'participant__last_name',
@@ -675,7 +734,77 @@ def refused_assistances(request):
 	# Filters are defined in templatetags/portal_filters.py
 	return render(request, 'portal/assistance_list.html', context)
 
+@require_http_methods(['GET'])
+@login_required
+def assistance_details(request, participant_id):
+	assistance = get_object_or_404(Assistance, participant__participant_id=participant_id)
+	
+	if request.method == 'GET':
+		context = getBaseContext()
+		context['assistance'] = assistance
+		return render(request, 'portal/assistance.html', context)
 
+@require_http_methods(['GET','POST'])
+@login_required
+def assistance_status(request, participant_id):
+	assistance = get_object_or_404(Assistance, participant__participant_id=participant_id)
+	
+	if request.method == 'GET':
+		context = getBaseContext()
+		context['assistance'] = assistance
+		return render(request, 'portal/assistance_status.html', context)
+	
+	else:
+		status = request.POST['status']
+		accepted_time = request.POST['accepted_time']
+		estimated_mttr = request.POST['estimated_mttr']
+		
+		# If status == ACCEPTED other fields must be filled in
+		if status == Assistance.ACCEPTED and (not accepted_time or not estimated_mttr):
+			context = getBaseContext()
+			context['assistance'] = assistance
+			context['error_message'] = 'Se si accetta l\'assistenza occorre specificare un orario e un tempo stimato di intervento.'
+			return render(request, 'portal/assistance_status.html', context)
+		
+		# Required to determine if we must send the email or not
+		old_status = assistance.acceptance
+		
+		# Update fields and save the object
+		assistance.acceptance = status
+		if status == Assistance.ACCEPTED:
+			assistance.accepted_time = accepted_time
+			assistance.estimated_mttr = estimated_mttr
+		elif status == Assistance.REFUSED:
+			assistance.accepted_time = None
+			assistance.estimated_mttr = None
+		else:
+			context = getBaseContext()
+			context['assistance'] = assistance
+			context['error_message'] = 'Occorre specificare uno stato valido.'
+			return render(request, 'portal/assistance_status.html', context)
+		try:
+			assistance.save()
+		except IntegrityError as e:
+			context = getBaseContext()
+			context['assistance'] = assistance
+			context['error_message'] = 'Si è verificato un errore nella richiesta, controlla che i campi siano validi.'
+			return render(request, 'portal/assistance_status.html', context)
+		
+		# Send the email if status changed
+		if old_status != status:
+			if not DISABLE_EMAIL:
+				t = threading.Thread(target=send_assistance_email, args=(assistance,))
+				t.start()
+			else:
+				print('Email disabled! No email was sent to "' + form.cleaned_data['first_name'] + '" for changes in assistance status.')
+		
+		assistance = Assistance.objects.get(participant__participant_id=participant_id)
+		context = getBaseContext()
+		context['assistance'] = assistance
+		context['confirm_message'] = 'Le modifiche sono state salvate'
+		return render(request, 'portal/assistance_status.html', context)
+
+#####################################################################################################
 
 # REST Interface
 class RESTParticipantList(generics.ListCreateAPIView):
@@ -688,7 +817,7 @@ class RESTParticipantDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = Participant.objects.all()
 	serializer_class = ParticipantSerializer
 
-
+#####################################################################################################
 
 # System wide views
 

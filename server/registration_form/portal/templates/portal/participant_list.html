@@ -20,7 +20,7 @@
 					<tbody>
 						{% for p in participants %}
 						<tr>
-							<th><a href="{% url 'portal:participant_details' %}?id={{ p.participant_id }}">{{ p.participant_id }}</a></th>
+							<th><a href="{% url 'portal:participant_details' participant_id=p.participant_id %}">{{ p.participant_id }}</a></th>
 							<th>{{ p.last_name }}</th>
 							<th>{{ p.first_name }}</th>
 							<th>{{ p.participate_morning }}</th>

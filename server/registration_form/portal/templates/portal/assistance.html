@@ -1,0 +1,57 @@
+{% extends 'portal/base_template.html' %}
+{% load staticfiles %}
+{% load portal_filters %}{# See templatetags/portal_filters.py for filter definition #}
+
+{% block description %}Linux Day{% endblock %}
+{% block title %}{{ assistance.participant }}{% endblock %}
+{% block content %}
+
+		<div class="row">
+			<div class="col-sm-12"><h2>Assistenza per <a href="{% url 'portal:participant_details' participant_id=assistance.participant.participant_id %}">{{ assistance.participant }}</a></h2></div>
+		</div>
+		
+		<div class="row">
+			<div class="col-sm-12">
+				<table class="table table-striped table-bordered">
+					<tbody>
+						<tr>
+							<th><b>Tipo PC</b>:</th><th>{{ assistance.pc_type|pc_type }}</th>
+						</tr>
+						<tr>
+							<th><b>Marca</b>:</th><th>{{ assistance.brand }}</th>
+						</tr>
+						<tr>
+							<th><b>Modello</b>:</th><th>{{ assistance.model }}</th>
+						</tr>
+						<tr>
+							<th><b>CPU</b>:</th><th>{{ assistance.cpu }}</th>
+						</tr>
+						<tr>
+							<th><b>RAM</b>:</th><th>{{ assistance.ram }}</th>
+						</tr>
+						<tr>
+							<th><b>Problema</b>:</th><th>{{ assistance.problem }}</th>
+						</tr>
+						<tr>
+							<th><b>Preferenza d'orario</b>:</th><th>{{ assistance.preferred_time }}</th>
+						</tr>
+						<tr>
+							<th><b>Stato d'accettazione</b>:</th><th>{{ assistance.acceptance|acceptance_status }} <a href="{% url 'portal:assistance_status' participant_id=assistance.participant.participant_id %}">Cambia stato</a></th>
+						</tr>
+						{% if assistance.acceptance != None %}
+						<tr>
+							<th><b>Orario appuntamento</b>:</th><th>{{ assistance.accepted_time }}</th>
+						</tr>
+						<tr>
+							<th><b>Tempo stimato di intervento</b>:</th><th>{{ assistance.estimated_mttr }}</th>
+						</tr>
+						<tr>
+							<th><b>Operatore</b>:</th><th>{{ assistance.operator }}</th>
+						</tr>
+						{% endif %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+{% endblock %}

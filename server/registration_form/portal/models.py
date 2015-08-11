@@ -4,6 +4,7 @@
 # ----------------------------------------------------------------------- #
 
 from django.db import models
+from django.conf import settings
 
 # Create your models here.
 class Participant(models.Model):
@@ -56,7 +57,9 @@ class Assistance(models.Model):
 	preferred_time = models.TimeField(blank=True, null=True)
 	acceptance = models.CharField(max_length=1, choices=STATUS, blank=True, null=True)
 	accepted_time = models.TimeField(blank=True, null=True)
-	estimated_mttr = models.DurationField(blank=True, null=True)
+	estimated_mttr = models.IntegerField(blank=True, null=True)
+	
+	operator = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
 	
 	def __str__(self):
 		return 'Assistenza per ' + str(self.participant.first_name) + ' ' + str(self.participant.last_name)

@@ -1,6 +1,6 @@
 {% extends 'portal/base_template.html' %}
 {% load staticfiles %}
-{% load portal_filters %}
+{% load portal_filters %}{# See templatetags/portal_filters.py for filter definition #}
 
 {% block description %}Linux Day{% endblock %}
 {% block title %}Lista partecipanti{% endblock %}
@@ -21,11 +21,11 @@
 					<tbody>
 						{% for a in assistances %}
 						<tr>
-							<th><a href="#">{{ a.participant__participant_id }}</a></th>
+							<th><a href="{% url 'portal:assistance_details' participant_id=a.participant__participant_id %}">{{ a.participant__participant_id }}</a></th>
 							<th>{{ a.participant__last_name }}</th>
 							<th>{{ a.participant__first_name }}</th>
-							<th>{{ a.pc_type|pc_type }}</th>
-							<th>{{ a.acceptance|acceptance_status }}</th>
+							<th>{{ a.pc_type|pc_type }}</th>{# See templatetags/portal_filters.py for filter definition #}
+							<th>{{ a.acceptance|acceptance_status }}</th>{# See templatetags/portal_filters.py for filter definition #}
 							<th>{{ a.accepted_time }}</th>
 							<th>{{ a.estimated_mttr }}</th>
 						</tr>

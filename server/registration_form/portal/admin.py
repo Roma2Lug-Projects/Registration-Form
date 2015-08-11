@@ -42,6 +42,7 @@ class AssistanceAdmin(admin.ModelAdmin):
 		('Participant',		{'fields': ['participant']}),
 		('PC info',			{'fields': ['pc_type', 'brand', 'model', 'cpu', 'ram', 'problem']}),
 		('Time',			{'fields': ['preferred_time', 'acceptance', 'accepted_time', 'estimated_mttr']}),
+		('Operator',		{'fields': ['operator']}),
 	]
 	
 	list_display = [
@@ -50,11 +51,12 @@ class AssistanceAdmin(admin.ModelAdmin):
 		'problem',
 		'acceptance',
 		'accepted_time',
-		'estimated_mttr',]
+		'estimated_mttr',
+		'operator',]
 	
 	list_filter = ['pc_type', 'acceptance']
 	search_fields = ['participant']
-	ordering = ['participant', 'accepted_time',]
+	ordering = ['participant', 'accepted_time','operator']
 
 admin.site.register(Assistance, AssistanceAdmin)
 
