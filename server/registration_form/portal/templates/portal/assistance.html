@@ -38,15 +38,15 @@
 						<tr>
 							<th><b>Stato d'accettazione</b>:</th><th>{{ assistance.acceptance|acceptance_status }} <a href="{% url 'portal:assistance_status' participant_id=assistance.participant.participant_id %}">Cambia stato</a></th>
 						</tr>
-						{% if assistance.acceptance != None %}
+						{% if assistance.acceptance == assistance.ACCEPTED %}
 						<tr>
 							<th><b>Orario appuntamento</b>:</th><th>{{ assistance.accepted_time }}</th>
 						</tr>
 						<tr>
-							<th><b>Tempo stimato di intervento</b>:</th><th>{{ assistance.estimated_mttr }}</th>
+							<th><b>Tempo stimato di intervento</b>:</th><th>{{ assistance.estimated_mttr }} ore</th>
 						</tr>
 						<tr>
-							<th><b>Operatore</b>:</th><th>{{ assistance.operator }}</th>
+							<th><b>Operatore</b>:</th><th>{% if not assistance.operator %}<a href="{% url 'portal:assistance_details' participant_id=assistance.participant.participant_id %}?get_assistance=true">Prendi assistenza</a>{% else %}{{ assistance.operator }}{% if assistance.operator == user %} <a href="{% url 'portal:assistance_details' participant_id=assistance.participant.participant_id %}?get_assistance=false">Annulla</a>{% endif %}{% endif %}</th>
 						</tr>
 						{% endif %}
 					</tbody>

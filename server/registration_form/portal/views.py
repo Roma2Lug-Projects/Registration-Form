@@ -740,6 +740,14 @@ def assistance_details(request, participant_id):
 	assistance = get_object_or_404(Assistance, participant__participant_id=participant_id)
 	
 	if request.method == 'GET':
+		get_assistance = request.GET.get('get_assistance')
+		if get_assistance:
+			if get_assistance == 'true' and assistance.operator == None:
+				assistance.operator = request.user
+			elif get_assistance == 'false' and assistance.operator == request.user:
+				assistance.operator = None
+			assistance.save()
+		
 		context = getBaseContext()
 		context['assistance'] = assistance
 		return render(request, 'portal/assistance.html', context)
@@ -796,7 +804,7 @@ def assistance_status(request, participant_id):
 				t = threading.Thread(target=send_assistance_email, args=(assistance,))
 				t.start()
 			else:
-				print('Email disabled! No email was sent to "' + form.cleaned_data['first_name'] + '" for changes in assistance status.')
+				print('Email disabled! No email was sent to "' + str(assistance.participant) + '" for changes in assistance status.')
 		
 		assistance = Assistance.objects.get(participant__participant_id=participant_id)
 		context = getBaseContext()
