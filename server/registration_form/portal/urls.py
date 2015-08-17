@@ -30,8 +30,10 @@ urlpatterns = patterns('',
 	url(r'^assistances/status/(?P<participant_id>[a-z0-9]{16})$', views.assistance_status, name='assistance_status'),
 	
 	# REST interfaces
-	url(r'^rest/$', views.RESTParticipantList.as_view(), name='rest_list'),
-	url(r'^rest/(?P<pk>[a-z0-9]{16})/$', views.RESTParticipantDetail.as_view(), name='rest_detail'),
+	url(r'^rest/participants/$', views.RESTParticipantList.as_view(), name='rest_participants_list'),
+	url(r'^rest/participants/(?P<pk>[a-z0-9]{16})/$', views.RESTParticipantDetails.as_view(), name='rest_participants_details'),
+	url(r'^rest/assistances/$', views.RESTAssistanceList.as_view(), name='rest_assistances_list'),
+	url(r'^rest/assistances/(?P<pk>[a-z0-9]{16})/$', views.RESTAssistanceDetails.as_view(), name='rest_assistances_details'),
 	url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 	
 	# Access management

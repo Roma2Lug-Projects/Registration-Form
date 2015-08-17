@@ -204,9 +204,12 @@ public class MainFragment extends Fragment {
 			String user = pref.getString(getActivity().getString(R.string.pref_key_username), "");
 			String pass = pref.getString(getActivity().getString(R.string.pref_key_password), "");
 			
+			if (!server.endsWith("/"))
+				server += "/";
+			
 			try {
 				
-				conn = new NetConnection("GET", server + currentID + "/");
+				conn = new NetConnection("GET", server + NetConnection.PARTICIPANTS_PATH + currentID + "/");
 				conn.setCredential(user, pass);
 				
 				if (conn.getResponseCode() == 200) {
@@ -275,8 +278,11 @@ public class MainFragment extends Fragment {
 			String user = pref.getString(getActivity().getString(R.string.pref_key_username), "");
 			String pass = pref.getString(getActivity().getString(R.string.pref_key_password), "");
 			
+			if (!server.endsWith("/"))
+				server += "/";
+			
 			try {
-				conn = new NetConnection("PUT", server + currentID + "/");
+				conn = new NetConnection("PUT", server + NetConnection.PARTICIPANTS_PATH + currentID + "/");
 				conn.setCredential(user, pass);
 				
 				if (currentJSON != null) {
@@ -331,8 +337,11 @@ public class MainFragment extends Fragment {
 			String user = pref.getString(getActivity().getString(R.string.pref_key_username), "");
 			String pass = pref.getString(getActivity().getString(R.string.pref_key_password), "");
 			
+			if (!server.endsWith("/"))
+				server += "/";
+			
 			try {
-				conn = new NetConnection("PUT", server + currentID + "/");
+				conn = new NetConnection("PUT", server + NetConnection.PARTICIPANTS_PATH + currentID + "/");
 				conn.setCredential(user, pass);
 				
 				if (currentJSON != null) {

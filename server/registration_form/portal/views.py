@@ -40,7 +40,7 @@ from io import BytesIO
 # Model
 from django.db import IntegrityError
 from portal.models import Participant, AdminProperty, Assistance
-from portal.serializers import ParticipantSerializer
+from portal.serializers import ParticipantSerializer, AssistanceSerializer
 
 #####################################################################################################
 
@@ -844,10 +844,20 @@ class RESTParticipantList(generics.ListAPIView):
 	queryset = Participant.objects.all()
 	serializer_class = ParticipantSerializer
 
-class RESTParticipantDetail(generics.RetrieveUpdateAPIView):
+class RESTParticipantDetails(generics.RetrieveUpdateAPIView):
 	permission_classes = (permissions.IsAuthenticated,)
 	queryset = Participant.objects.all()
 	serializer_class = ParticipantSerializer
+
+class RESTAssistanceList(generics.ListAPIView):
+	permission_classes = (permissions.IsAuthenticated,)
+	queryset = Assistance.objects.all()
+	serializer_class = AssistanceSerializer
+
+class RESTAssistanceDetails(generics.RetrieveUpdateAPIView):
+	permission_classes = (permissions.IsAuthenticated,)
+	queryset = Assistance.objects.all()
+	serializer_class = AssistanceSerializer
 
 #####################################################################################################
 

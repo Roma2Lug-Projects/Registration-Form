@@ -45,20 +45,25 @@ There are some things you should know before run the server:
 
 If the server URL is http://example.com:8080/, these URLs are available:
 
-- *http://example.com:8080/*: this is the registration form where the users
-  sign for their presence at the event
-- *http://example.com:8080/rest/*: this is the base URL for the REST interface,
-  it is also available from browser
-- *http://example.com:8080/rest/1/*: where 1 is an ID (it can be any integer number),
-  this URL is the REST interface for the details of the user with this ID
+- *http://example.com:8080/*: this is the index of the portal and can be accessed
+  from the browser;
 - *http://example.com:8080/admin/*: this is the Django administration portal
-  where you can create and delete administration users and manage participant
-  registrations
-- *http://example.com:8080/qr/0123456789abcdef*: this page shows a QR Code with ID
-  0123456789abcdef (must be 16 characters)
-- *http://example.com:8080/qr/0123456789abcdef.svg*: this page generate an svg image of
-  a QR Code with 0123456789abcdef written in it
-- *http://example.com:8080/qr/0123456789abcdef.png*: same as above, but in png format
+  where you can create and delete administration users and manage objects
+  in the database
+- *http://example.com:8080/qr/<id>*: where id is an alphanumerical code
+  of 16 digits, this page shows a QR Code with the given ID as text
+- *http://example.com:8080/qr/<id>.svg*: this page generate an svg image of
+  a QR Code with the given ID written in it
+- *http://example.com:8080/qr/<id>.png*: same as above, but in png format
+
+The following REST interfaces are available:
+
+- *http://example.com:8080/rest/participants/*: lists all participants
+- *http://example.com:8080/rest/participants/<id>/*: where id is an alphanumerical code
+  of 16 digits, this interface shows the participant details
+- *http://example.com:8080/rest/assistances/*: lists all assistances
+- *http://example.com:8080/rest/assistances/<id>/*: where id is an alphanumerical code
+  of 16 digits, this interface shows the details of an assistance
 
 ### Important files
 
@@ -87,13 +92,13 @@ If the server URL is http://example.com:8080/, these URLs are available:
 
 		~# apt-get install apache2 libapache2-mod-wsgi
 
-- Now you need Python virtualenv and pip:
+- Now you need Python virtualenv:
 
-		~# apt-get install python-virtualenv python-pip
+		~# apt-get install python-virtualenv
 
-- Some Python packages also require python-dev and python-setuptools:
+- Some Python packages also require python3-dev and python3-setuptools:
 
-		~# apt-get install python-dev python-setuptools
+		~# apt-get install python3-dev python3-setuptools
 
 - Move *server/registration_form/registration_form/local_settings.py.example* in
   *server/registration_form/registration_form/local_settings.py*:
@@ -179,7 +184,7 @@ rest/).
 You need to have the QR Code scanner on the phone, otherwise this app will prompt you
 to install it.
 You can fetch a participant details scanning its QR Code or typing his ID manually.
-When you can see his details on the app you can procede to check in his presence.
+When you can see his details on the app you can proceed to check in his presence.
 
 
 

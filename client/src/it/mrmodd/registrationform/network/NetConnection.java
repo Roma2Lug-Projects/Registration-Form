@@ -22,6 +22,9 @@ import android.util.Base64;
 import android.util.Log;
 
 public class NetConnection {
+	public static final String PARTICIPANTS_PATH = "participants/";
+	public static final String ASSISTANCES_PATH = "assistances/";
+	
 	// TODO Test secure connection
 	private HttpURLConnection connection;
 	
