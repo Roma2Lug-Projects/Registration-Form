@@ -32,6 +32,7 @@
     <string name="error_no_id_selected">Selezionare prima un ID</string>
     <string name="error_already_checked_in">Utente già acceduto</string>
     <string name="error_already_checked_out">Utente non ancora acceduto</string>
+    <string name="error_market">Impossibile aprire il Play Store per installare l\'app di scansione dei QR Code</string>
     
     <!-- Preferences -->
     <string name="pref_server_url">URL del server REST</string>

@@ -5,14 +5,9 @@ package it.mrmodd.registrationform;
 * on behalf of Roma2LUG (http://lug.uniroma2.it/)                         *
 \*************************************************************************/
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
+import it.mrmodd.registrationform.network.NetConnection;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -26,7 +21,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -79,15 +73,21 @@ public class MainFragment extends Fragment {
 
 				    startActivityForResult(intent, 0);
 
-				} catch (Exception e) {
-
-				    Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-				    Intent marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
-				    
+				} catch (android.content.ActivityNotFoundException e) {
+					/* Required QR Code app */
+					
 				    cleanScreen();
-				    
-				    startActivity(marketIntent);
 
+					Intent marketIntent = null;
+					try {
+					    Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+					    marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
+				    	startActivity(marketIntent);
+					} catch (android.content.ActivityNotFoundException e1) {
+					    Uri marketUri = Uri.parse("https://play.google.com/store/apps/details?id=com.google.zxing.client.android");
+					    marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
+				    	startActivity(marketIntent);
+					}
 				}
 			}
 			
@@ -192,71 +192,26 @@ public class MainFragment extends Fragment {
 		editTextID.setText("");
 	}
 	
-	private HttpURLConnection enstablishConnection(String method, String file) throws IOException {
-		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		
-		String url_pref = pref.getString(getActivity().getString(R.string.pref_key_server_url), "");
-		String credentials = pref.getString(getActivity().getString(R.string.pref_key_username), "")
-								+ ":"
-								+ pref.getString(getActivity().getString(R.string.pref_key_password), "");
-		URL url;
-		HttpURLConnection connection;
-		
-		url = new URL(url_pref + file);
-		
-		connection = (HttpURLConnection) url.openConnection();
-		connection.setRequestMethod(method);
-		
-		if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT"))
-			connection.setDoOutput(true);
-		connection.setDoInput(true);
-		
-		connection.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT));
-		
-		return connection;
-	}
-	
-	private String fetchJSON(HttpURLConnection conn) throws IOException {
-		InputStream content = conn.getInputStream();
-		BufferedReader in = new BufferedReader (new InputStreamReader(content));
-		String line;
-		String json = "";
-		while ((line = in.readLine()) != null) {
-			json += line;
-		}
-		content.close();
-		in.close();
-		
-		return json;
-	}
-	
-	private void writeJSON(HttpURLConnection conn, String json) throws IOException {
-		
-		conn.setRequestProperty("Content-Type", "application/json");
-		conn.setRequestProperty("Content-Length", "" + json.getBytes("UTF-8").length);
-		
-		OutputStream os = conn.getOutputStream();
-		DataOutputStream dos = new DataOutputStream(os);
-		dos.write(json.getBytes("UTF-8"));
-		dos.flush();
-		dos.close();
-		os.close();
-		
-	}
-	
 	class RetrieveDetails extends AsyncTask<Void, String, String> {
 
 		@Override
 		protected String doInBackground(Void... params) {
 			String newtext = null;
+			NetConnection conn = null;
+
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+			String server = pref.getString(getActivity().getString(R.string.pref_key_server_url), "");
+			String user = pref.getString(getActivity().getString(R.string.pref_key_username), "");
+			String pass = pref.getString(getActivity().getString(R.string.pref_key_password), "");
 			
-			HttpURLConnection conn = null;
 			try {
-				conn = enstablishConnection("GET", currentID + "/");
+				
+				conn = new NetConnection("GET", server + currentID + "/");
+				conn.setCredential(user, pass);
 				
 				if (conn.getResponseCode() == 200) {
 					
-					String json = fetchJSON(conn);
+					String json = conn.readString();
 
 					//Parse JSON
 					currentJSON = new JSONObject(json);
@@ -313,10 +268,16 @@ public class MainFragment extends Fragment {
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			NetConnection conn = null;
+
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+			String server = pref.getString(getActivity().getString(R.string.pref_key_server_url), "");
+			String user = pref.getString(getActivity().getString(R.string.pref_key_username), "");
+			String pass = pref.getString(getActivity().getString(R.string.pref_key_password), "");
 			
-			HttpURLConnection conn = null;
 			try {
-				conn = enstablishConnection("PUT", currentID.toString() + "/");
+				conn = new NetConnection("PUT", server + currentID + "/");
+				conn.setCredential(user, pass);
 				
 				if (currentJSON != null) {
 					if (!currentJSON.getString("check_in").matches("null"))
@@ -325,11 +286,10 @@ public class MainFragment extends Fragment {
 						String date = new java.sql.Timestamp(new Date().getTime()).toString();
 						currentJSON.put("check_in", date);
 						
-						writeJSON(conn, currentJSON.toString());
+						conn.writeString(currentJSON.toString());
 						
 						if (conn.getResponseCode() == 200) {
 							publishProgress(conn.getResponseMessage());
-							fetchJSON(conn);
 						}
 						else
 							publishProgress(getActivity().getString(R.string.error_server_code) + "\n" + conn.getResponseCode() + ": " + conn.getResponseMessage());
@@ -364,10 +324,16 @@ public class MainFragment extends Fragment {
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			NetConnection conn = null;
+
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+			String server = pref.getString(getActivity().getString(R.string.pref_key_server_url), "");
+			String user = pref.getString(getActivity().getString(R.string.pref_key_username), "");
+			String pass = pref.getString(getActivity().getString(R.string.pref_key_password), "");
 			
-			HttpURLConnection conn = null;
 			try {
-				conn = enstablishConnection("PUT", currentID.toString() + "/");
+				conn = new NetConnection("PUT", server + currentID + "/");
+				conn.setCredential(user, pass);
 				
 				if (currentJSON != null) {
 					
@@ -376,11 +342,10 @@ public class MainFragment extends Fragment {
 					else {
 						currentJSON.put("check_in", JSONObject.NULL);
 						
-						writeJSON(conn, currentJSON.toString());
+						conn.writeString(currentJSON.toString());
 						
 						if (conn.getResponseCode() == 200) {
 							publishProgress(conn.getResponseMessage());
-							fetchJSON(conn);
 						}
 						else
 							publishProgress(getActivity().getString(R.string.error_server_code) + "\n" + conn.getResponseCode() + ": " + conn.getResponseMessage());

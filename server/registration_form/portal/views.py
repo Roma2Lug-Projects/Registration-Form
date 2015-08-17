@@ -838,13 +838,13 @@ def assistance_status(request, participant_id):
 
 #####################################################################################################
 
-# REST Interface
-class RESTParticipantList(generics.ListCreateAPIView):
+# REST Interfaces
+class RESTParticipantList(generics.ListAPIView):
 	permission_classes = (permissions.IsAuthenticated,)
 	queryset = Participant.objects.all()
 	serializer_class = ParticipantSerializer
 
-class RESTParticipantDetail(generics.RetrieveUpdateDestroyAPIView):
+class RESTParticipantDetail(generics.RetrieveUpdateAPIView):
 	permission_classes = (permissions.IsAuthenticated,)
 	queryset = Participant.objects.all()
 	serializer_class = ParticipantSerializer

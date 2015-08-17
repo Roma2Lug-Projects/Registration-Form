@@ -32,10 +32,11 @@
     <string name="error_no_id_selected">Select an ID first</string>
     <string name="error_already_checked_in">User already checked in</string>
     <string name="error_already_checked_out">User already not checked in</string>
+    <string name="error_market">Cannot open Play Store and get QR Code scanner app</string>
     
     <!-- Preferences -->
     <string name="pref_server_url">Server REST URL</string>
-    <string name="pref_username">Server username</string>
-    <string name="pref_password">Server password</string>
+    <string name="pref_username">User</string>
+    <string name="pref_password">Password</string>
 
 </resources>
