@@ -25,6 +25,7 @@ urlpatterns = patterns('',
 	url(r'^assistances/pending$', views.pending_assistances, name='pending_assistances'),
 	url(r'^assistances/accepted$', views.accepted_assistances, name='accepted_assistances'),
 	url(r'^assistances/refused$', views.refused_assistances, name='refused_assistances'),
+	url(r'^assistances/served$', views.served_assistances, name='served_assistances'),
 	url(r'^assistances/details/(?P<participant_id>[a-z0-9]{16})$', views.assistance_details, name='assistance_details'),
 	url(r'^assistances/status/(?P<participant_id>[a-z0-9]{16})$', views.assistance_status, name='assistance_status'),
 	

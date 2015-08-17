@@ -293,6 +293,9 @@ def index(request):
 			
 			not_accepted_assistances = Assistance.objects.filter(acceptance=Assistance.REFUSED).count()
 			context['refused_assistances'] = not_accepted_assistances
+			
+			served_assistances = Assistance.objects.filter(operator__isnull=False).count()
+			context['served_assistances'] = served_assistances
 		
 		else:
 			# User is anonymous: show the public registration form
@@ -730,6 +733,27 @@ def refused_assistances(request):
 	context = getBaseContext()
 	context['assistances'] = assistances
 	context['message'] = 'Lista delle richieste di assistenza rifiutate'
+	
+	# Filters are defined in templatetags/portal_filters.py
+	return render(request, 'portal/assistance_list.html', context)
+
+@require_http_methods(['GET',])
+@login_required
+def served_assistances(request):
+	# Refused assistances
+	
+	assistances = Assistance.objects.filter(operator__isnull=False).values(
+			'participant__participant_id',
+			'participant__last_name',
+			'participant__first_name',
+			'pc_type',
+			'acceptance',
+			'accepted_time',
+			'estimated_mttr').order_by('participant__last_name',)
+	
+	context = getBaseContext()
+	context['assistances'] = assistances
+	context['message'] = 'Lista delle richieste di assistenza già servite'
 	
 	# Filters are defined in templatetags/portal_filters.py
 	return render(request, 'portal/assistance_list.html', context)
