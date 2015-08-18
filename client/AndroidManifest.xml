@@ -29,6 +29,9 @@
             android:label="@string/action_settings"
             android:launchMode="singleTop" >
         </activity>
+        <activity
+            android:name=".ActivityAssistances" >
+        </activity>
     </application>
 
 </manifest>

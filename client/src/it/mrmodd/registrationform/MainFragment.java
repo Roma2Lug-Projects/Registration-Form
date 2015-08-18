@@ -37,6 +37,7 @@ public class MainFragment extends Fragment {
 	private Button buttonAccept;
 	private Button buttonRemove;
 	private Button buttonCancel;
+	private Button buttonAssistance;
 	
 	private TextView textViewCurrentID;
 	
@@ -44,6 +45,7 @@ public class MainFragment extends Fragment {
 	
 	private String currentID = "";
 	private JSONObject currentJSON = null;
+	private boolean hasAssistance = false;
 	
 	
 	@Override
@@ -57,6 +59,7 @@ public class MainFragment extends Fragment {
 		buttonAccept = (Button) v.findViewById(R.id.button_accept);
 		buttonRemove = (Button) v.findViewById(R.id.button_remove);
 		buttonCancel = (Button) v.findViewById(R.id.button_cancel);
+		buttonAssistance = (Button) v.findViewById(R.id.button_assistance);
 		
 		textViewCurrentID = (TextView) v.findViewById(R.id.text_currentID);
 		
@@ -108,10 +111,7 @@ public class MainFragment extends Fragment {
 					return;
 				}
 				
-				editTextID.setText("");
-				
 				cleanScreen();
-				
 				currentID = id;
         		new RetrieveDetails().execute();
 				
@@ -160,6 +160,23 @@ public class MainFragment extends Fragment {
 			
 		});
 		
+		buttonAssistance.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				
+				if (currentID.length() != 0) {
+					Intent assistances = new Intent(getActivity(), ActivityAssistances.class);
+					assistances.putExtra("id", currentID);
+					startActivity(assistances);
+				}
+				else {
+					buttonAssistance.setEnabled(false);
+				}
+			}
+			
+		});
+		
 		return v;
 	}
 	
@@ -171,7 +188,8 @@ public class MainFragment extends Fragment {
 	        if (resultCode == Activity.RESULT_OK) {
 	        	String qr = data.getStringExtra("SCAN_RESULT");
 	        	if (qr.matches(SERIAL_PATTERN)) {
-	        		
+
+					cleanScreen();
 	        		currentID = qr;
 	        		new RetrieveDetails().execute();
 	        		
@@ -190,6 +208,9 @@ public class MainFragment extends Fragment {
 		currentJSON = null;
 		textViewCurrentID.setText(R.string.text_empty);
 		editTextID.setText("");
+		buttonAssistance.setEnabled(false);
+		buttonAssistance.setText(R.string.button_assistance_def);
+		hasAssistance = false;
 	}
 	
 	class RetrieveDetails extends AsyncTask<Void, String, String> {
@@ -252,6 +273,24 @@ public class MainFragment extends Fragment {
 					conn.disconnect();
 			}
 			
+			// Check if this ID has an assistance
+			try {
+				
+				conn = new NetConnection("HEAD", server + NetConnection.ASSISTANCES_PATH + currentID + "/");
+				conn.setCredential(user, pass);
+				
+				if (conn.getResponseCode() == 200) {
+					hasAssistance = true;
+				}
+				
+			} catch (IOException | IllegalArgumentException e) {
+				publishProgress(getActivity().getString(R.string.error_connection));
+				e.printStackTrace();
+			} finally {
+				if (conn != null)
+					conn.disconnect();
+			}
+			
 			return newtext;
 		}
 		
@@ -264,6 +303,10 @@ public class MainFragment extends Fragment {
 		protected void onPostExecute(String result) {
 			if (result != null)
 				textViewCurrentID.setText(result);
+			if (hasAssistance) {
+				buttonAssistance.setEnabled(true);
+				buttonAssistance.setText(R.string.button_assistance);
+			}
 		}
 	}
 	
