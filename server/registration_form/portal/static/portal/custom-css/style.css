@@ -1,0 +1,36 @@
+body {
+  padding-top: 60px;
+  padding-bottom: 20px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+img.center {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
+}
+h1, h2, h3, h4, legend {
+	text-align: center;
+}
+div.spacer {
+	padding-top: 50px;
+}
+div.comment {
+	font-size: 18px;
+	text-align: center;
+}
+.col-centered {
+    float: none;
+    margin: 0 auto;
+}
+div.scroll {
+	overflow: auto;
+}
+@media all and (max-width: 767px) {
+    #header {
+        display:none;
+    }
+}

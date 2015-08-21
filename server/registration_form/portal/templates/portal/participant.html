@@ -1,0 +1,48 @@
+{% extends 'portal/base_template.html' %}
+{% load staticfiles %}
+
+{% block description %}Linux Day{% endblock %}
+{% block title %}{{ p.first_name }} {{ p.last_name }}{% endblock %}
+{% block content %}
+
+		<div class="row">
+			<div class="col-sm-12"><h2>{{ p.first_name }} {{ p.last_name }}</h2></div>
+		</div>
+		
+		<div class="row">
+			<div class="col-sm-12">
+				<table class="table table-striped table-bordered">
+					<tbody>
+						<tr>
+							<th><b>ID</b>:</th><th>{{ p.participant_id }}</th>
+						</tr>
+						<tr>
+							<th><b>Nome</b>:</th><th>{{ p.first_name }}</th>
+						</tr>
+						<tr>
+							<th><b>Cognome</b>:</th><th>{{ p.last_name }}</th>
+						</tr>
+						<tr>
+							<th><b>Mailing list</b>:</th><th>{% if p.mailing_list %}Si, <a href="{% url 'portal:email_sender' %}?id={{ p.participant_id }}">invia email</a>{% else %}No{% endif %}</th>
+						</tr>
+						<tr>
+							<th><b>Partecipazione mattina</b>:</th><th>{{ p.participate_morning }}</th>
+						</tr>
+						<tr>
+							<th><b>Partecipazione pomeriggio</b>:</th><th>{{ p.participate_afternoon }}</th>
+						</tr>
+						<tr>
+							<th><b>Data registrazione</b>:</th><th>{{ p.registration_date }}</th>
+						</tr>
+						<tr>
+							<th><b>Orario check-in</b>:</th><th>{% if not p.check_in %}<a href="{% url 'portal:participant_details' participant_id=p.participant_id %}?do_checkin=true">Fai check-in ora</a>{% else %}{{ p.check_in }} <a href="{% url 'portal:participant_details' participant_id=p.participant_id %}?do_checkin=false">annulla</a>{% endif %}</th>
+						</tr>
+						<tr>
+							<th><b>Commenti</b>:</th><th>{{ p.comments }}</th>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+{% endblock %}

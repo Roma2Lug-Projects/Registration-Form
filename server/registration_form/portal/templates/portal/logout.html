@@ -1,0 +1,16 @@
+{% extends 'portal/base_template.html' %}
+
+{% block description %}Amministrazione{% endblock %}
+
+{% block meta %}<meta http-equiv="refresh" content="5; url={% url 'portal:index' %}" />{% endblock %}
+
+{% block title %}Accesso amministratore{% endblock %}
+
+{% block content %}
+		<div class="row">
+			<div class="col-sm-12"><h1>Sei stato scollegato.</h1></div>
+        </div>
+        <div class="row">
+			<div class="col-sm-12"><h4>Tornerai alla home page tra 5 secondi.<br /><a href="{% url 'portal:index' %}">Clicca qui</a> per andare ora.</h4></div>
+		</div>
+{% endblock %}

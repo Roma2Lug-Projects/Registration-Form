@@ -21,8 +21,7 @@
         android:layout_below="@+id/button_qr"
         android:layout_marginBottom="15dp"
         android:layout_marginTop="15dp"
-        android:ems="10"
-        android:inputType="number" />
+        android:ems="10" />
 
     <Button
         android:id="@+id/button_id"
@@ -33,6 +32,15 @@
         android:layout_toEndOf="@+id/editText_id"
         android:layout_toRightOf="@+id/editText_id"
         android:text="@string/button_id" />
+
+    <Button
+        android:id="@+id/button_assistance"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/linearLayout1"
+        android:enabled="false"
+        android:text="@string/button_assistance_def" />
 
     <LinearLayout
         android:id="@+id/linearLayout1"
@@ -73,7 +81,7 @@
         android:id="@+id/scrollView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/linearLayout1"
+        android:layout_above="@+id/button_assistance"
         android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"

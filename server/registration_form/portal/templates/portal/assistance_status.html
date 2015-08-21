@@ -1,0 +1,77 @@
+{% extends 'portal/base_template.html' %}
+{% load staticfiles %}
+{% load portal_filters %}{# See templatetags/portal_filters.py for filter definition #}
+
+{% block description %}Linux Day{% endblock %}
+{% block title %}{{ assistance.participant }}{% endblock %}
+{% block content %}
+
+		<div class="row">
+			<div class="col-sm-12"><h2>Cambia lo stato dell'assistenza</a></h2></div>
+		</div>
+		
+		<div class="spacer"></div>
+		
+		<form class="form-horizontal" method="post" action="{% url 'portal:assistance_status' participant_id=assistance.participant.participant_id %}"
+				onsubmit="return confirm('Sicuro di voler continuare?\nSe lo stato cambia verrà inviata un\'email a {{ assistance.participant }}.');">
+			{% csrf_token %}
+
+			{% if error_message %}
+			<div class="row">
+				<div class="col-sm-10 col-lg-10 col-sm-offset-2">
+					<div class="alert alert-warning alert-dismissible" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Chiudi"><span aria-hidden="true">&times;</span></button>
+						{{ error_message }}
+					</div>
+				</div>
+			</div>
+			{% endif %}
+
+			{% if confirm_message %}
+			<div class="row">
+				<div class="col-sm-10 col-lg-10 col-sm-offset-2">
+					<div class="alert alert-success alert-dismissible" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Chiudi"><span aria-hidden="true">&times;</span></button>
+						{{ confirm_message }}
+					</div>
+				</div>
+			</div>
+			{% endif %}
+			
+			<div class="form-group">
+				<label class="control-label col-sm-2 col-lg-2" for="preference">Orario preferito:</label>
+				<div class="col-sm-10 col-lg-10">
+					<input class="form-control" id="id_preference" name="preference" type="time" value="{{ assistance.preferred_time|time:'H:i' }}" disabled>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2 col-lg-2" for="status">Nuovo stato:</label>
+				<div class="col-sm-10 col-lg-10">
+					<select id="id_status" name="status" class="form-control" required>
+						<option value="">-- (Pendente)</option>
+						{% for option in assistance.STATUS %}
+						<option value="{{ option.0 }}" {% if assistance.acceptance == option.0 %}selected="selected"{% endif %}>{{ option.1 }}</option>
+						{% endfor %}
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2 col-lg-2" for="accepted_time">Orario scelto:</label>
+				<div class="col-sm-10 col-lg-10">
+					<input class="form-control" id="id_accepted_time" name="accepted_time" type="time" value="{{ assistance.accepted_time|time:'H:i' }}">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2 col-lg-2" for="estimated_mttr">Tempo stimato di intervento (ore):</label>
+				<div class="col-sm-10 col-lg-10">
+					<input class="form-control" id="id_estimated_mttr" name="estimated_mttr" type="number" value="{{ assistance.estimated_mttr }}">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-10 col-sm-offset-2">
+					<button type="submit" class="btn btn-primary btn-block">Aggiorna</button>
+				</div>
+			</div>
+		</form>
+
+{% endblock %}

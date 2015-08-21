@@ -1,38 +1,32 @@
-<!DOCTYPE html>
-<!--
-# ----------------------------------------------------------------------- #
-# Copyright (C) 2014-2015 Federico "MrModd" Cosentino (http://mrmodd.it/) #
-# on behalf of Roma2LUG (http://lug.uniroma2.it/)                         #
-# ----------------------------------------------------------------------- #
--->
+{% extends 'portal/base_template.html' %}
 
+{% block description %}Linux Day{% endblock %}
+{% block title %}Registrazione effettuata{% endblock %}
+{% block content %}
 
-
-{% load staticfiles %}
-
-<head>
-	<title>Registration Form</title>
-	<style>
-		.center {
-			text-align: center;
-		}
-	</style>
-</head>
-
-<body>
-	<div class="center">
-		<img src="{% static 'portal/Logo.png' %}" alt="Roma2LUG" />
-		<h1>Linux Day 2014</h1>
-		<h2>Grazie {{ name }} per esserti registrato!</h2>
-		<h3>Ti abbiamo inviato un'email all'indirizzo indicato con il tuo codice univoco di registrazione<br />
-			e un QR Code che dovrai mostrare all'ingresso anche dallo schermo del cellulare.<br />
-		</h3>
-		<h3>
-			Se non dovesse esserti arrivata l'email stampa questa pagina oppure salvati il seguente codice e l'immagine:
-		</h3>
-		<h2>ID: {{ reg_id }}<br /><img src="{% url 'qrpng' reg_id %}" alt="{{ reg_id }}" /></h2>
-		<p>Visita il nostro portale dedicato al <a href="http://lug.uniroma2.it/ld14">Linux Day 2014</a> per essere informato sullo stato dei lavori!</p>
-	</div>
-</body>
-
-</html>
+		<div class="row">
+			<div class="col-sm-12"><h2>Grazie {{ name }} per esserti registrato!</h2></div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12"><h3>
+				Ti abbiamo inviato un'email all'indirizzo indicato con il tuo codice univoco di registrazione<br />
+				e un QR Code che dovrai mostrare all'ingresso anche dallo schermo del cellulare.<br />
+			</h3></div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12"><h3>
+				Se non dovesse esserti arrivata l'email stampa questa pagina oppure salvati il seguente codice e l'immagine:
+			</h3></div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12">
+				<h2>ID: <b>{{ reg_id }}</b><br /><img src="{% url 'qrcodes:qrpng' reg_id %}" alt="{{ reg_id }}" /></h2>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="comment">Visita il nostro portale dedicato al <a href="http://lug.uniroma2.it/ld15">Linux Day 2015</a> per essere informato sullo stato dei lavori!</div>
+			</div>
+		</div>
+		
+{% endblock %}

@@ -5,6 +5,9 @@
 Copyright (C) 2014-2015 Federico "MrModd" Cosentino (http://mrmodd.it/)
 on behalf of Roma2LUG (http://lug.uniroma2.it/)
 
+Django-bootstrap-form Copyright (c) by Ming Hsien Tzang
+Bootstrap under MIT license
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -19,8 +22,8 @@ GNU General Public License for more details.
 
 ## What is it?
 
-This project is the registration form for the Linux Day 2014 event organized
-by Roma2LUG. It is divided in a server and a client:
+This project is the registration form for the Linux Day 2015 event organized
+by Roma2LUG and LUGRoma3. It is divided in a server and a client:
 
 - **server**: this part is a Web server, written in Python with the Django
   framework and the Django-REST-framework interface. Users which want to
@@ -42,19 +45,25 @@ There are some things you should know before run the server:
 
 If the server URL is http://example.com:8080/, these URLs are available:
 
-- *http://example.com:8080/*: this is the registration form where the users
-  sign for their presence at the event
-- *http://example.com:8080/rest/*: this is the base URL for the REST interface,
-  it is also available from browser
-- *http://example.com:8080/rest/1/*: where 1 is an ID (it can be any integer number),
-  this URL is the REST interface for the details of the user with this ID
+- *http://example.com:8080/*: this is the index of the portal and can be accessed
+  from the browser;
 - *http://example.com:8080/admin/*: this is the Django administration portal
-  where you can create and delete administration users and manage participant
-  registrations
-- *http://example.com:8080/qr/123*: this page shows a QR Code with ID 123
-- *http://example.com:8080/qr/dl/123.svg*: this page generate an svg image of
-  a QR Code with 123 written in it
-- *http://example.com:8080/qr/dl/123.png*: same as above, but in png format
+  where you can create and delete administration users and manage objects
+  in the database
+- *http://example.com:8080/qr/<id>*: where id is an alphanumerical code
+  of 16 digits, this page shows a QR Code with the given ID as text
+- *http://example.com:8080/qr/<id>.svg*: this page generate an svg image of
+  a QR Code with the given ID written in it
+- *http://example.com:8080/qr/<id>.png*: same as above, but in png format
+
+The following REST interfaces are available:
+
+- *http://example.com:8080/rest/participants/*: lists all participants
+- *http://example.com:8080/rest/participants/<id>/*: where id is an alphanumerical code
+  of 16 digits, this interface shows the participant details
+- *http://example.com:8080/rest/assistances/*: lists all assistances
+- *http://example.com:8080/rest/assistances/<id>/*: where id is an alphanumerical code
+  of 16 digits, this interface shows the details of an assistance
 
 ### Important files
 
@@ -79,7 +88,7 @@ If the server URL is http://example.com:8080/, these URLs are available:
 ### Installation guide with Apache
 
 - You need to install Apache server (but not an entire LAMP server). On Ubuntu or Debian
-  install apache2 and libapache2-mod-wsgi:
+  install apache2 and libapache2-mod-wsgi-py3:
 
 		~# apt-get install apache2 libapache2-mod-wsgi-py3
 
@@ -95,7 +104,7 @@ If the server URL is http://example.com:8080/, these URLs are available:
   *server/registration_form/registration_form/local_settings.py*:
 
 		~$ mv server/registration_form/registration_form/local_settings.py.example\
-		~$ server/registration_form/registration_form/local_settings.py
+		 > server/registration_form/registration_form/local_settings.py
 
 - Modify this file with your data. Next steps assume you DIDN'T modify *STATIC_ROOT* and
   *STATIC_URL* variables
@@ -105,7 +114,6 @@ If the server URL is http://example.com:8080/, these URLs are available:
 		~# cp -r server/registration_form /var/www
 
 - Edit file *server/environment* and change *SERV_PATH* from *"."* to *"/var/www"*
-
 - Build virtual environment executing script *server/create-environment.sh*, afterward you
   should see a new *virtual* folder in */var/www/*:
 
@@ -124,35 +132,22 @@ If the server URL is http://example.com:8080/, these URLs are available:
 - - */var/www/static/*
 - - */var/www/registration_form/registration_form/wsgi.py*
 - - */var/www/virtual/lib/python3.4/site-packages/*
-- Now we need to edit Apache sites configuration file:
-- - In */etc/apache2/sites-enabled/* folder you should have a symbolic link called
-    *000-default.conf* or similar
-- - Open it and find *<VirtualHost *:80>* section
-- - Remove all the content of the tag and add next lines:
 
-```
-#!bash
+- Now you need to edit Apache sites configuration file:
+- - Copy the config file from server folder into Apache:
 
-		WSGIScriptAlias / /var/www/registration_form/registration_form/wsgi.py
-		WSGIDaemonProcess localhost python-path=/var/www/registration_form:/var/www/virtual/lib/python3.4/site-packages
-		WSGIProcessGroup localhost
-
-		WSGIPassAuthorization On
-
-		Alias /static/ /var/www/static/
-		
-		<Directory /var/www/static>
-			Require all granted
-		</Directory>
-		
-		<Directory /var/www/registration_form/registration_form>
-			<Files wsgi.py>
-				Require all granted
-			</Files>
-		</Directory>
-```
+		~# cp server/apache-django.conf /etc/apache2/sites-available/
 
 - - Remember to change */var/www/static* path if you changed it in *local_settings.py* file
+- - Enable SSL module:
+
+		~# a2enmod ssl
+
+- - Disable default configurations and enable the correct one:
+
+		~# a2dissite 000-default.conf
+		~# a2dissite default-ssl.conf
+		~# a2ensite apache-django.conf
 
 - Finally give correct permissions to the folder:
 
@@ -162,7 +157,14 @@ If the server URL is http://example.com:8080/, these URLs are available:
 
 		~# service apache2 restart
 
-- Now you should navigate typing http://localhost/
+- Now you should navigate typing http://localhost/ or https://localhost/
+
+- Optionally change the Apache default self-signed certificates with new ones:
+
+		~# openssl req -new -x509 -days 365 -nodes -out /etc/ssl/certs/apache-django.pem -keyout /etc/ssl/private/apache-django.key
+
+  and then change the paths of these files in */etc/apache2/sites-available/apache-django.conf* file you previously
+  copied. In particular change **SSLCertificateFile** and **SSLCertificateKeyFile** directives.
 
 ## Client
 
@@ -177,7 +179,5 @@ rest/).
 You need to have the QR Code scanner on the phone, otherwise this app will prompt you
 to install it.
 You can fetch a participant details scanning its QR Code or typing his ID manually.
-When you can see his details on the app you can procede to check in his presence.
-
-
+When you can see his details on the app you can proceed to check in his presence.
 

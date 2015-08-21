@@ -20,6 +20,29 @@
     <string name="button_accept">Record</string>
     <string name="button_remove">Remove</string>
     <string name="button_cancel">Cancel</string>
+    <string name="button_assistance_def">No assistance recorded</string>
+    <string name="button_assistance">Show assistance details</string>
+    
+    <!-- FragmentAssistances -->
+    <string name="text_accepted">Accepted</string>
+    <string name="text_refused">Refused</string>
+    <string name="text_pctype">PC Type:</string>
+    <string name="text_brand">Brand:</string>
+    <string name="text_model">Model:</string>
+    <string name="text_cpu">CPU:</string>
+    <string name="text_ram">RAM:</string>
+    <string name="text_problem">Problem:</string>
+    <string name="text_acceptance">Acceptance:</string>
+    <string name="text_accepted_time">Accepted time:</string>
+    <string name="text_mttr">MTTR:</string>
+    <string name="text_operator">Operator:</string>
+    <string name="text_desktop">Desktop</string>
+    <string name="text_laptop">Laptop</string>
+    <string name="text_chromebook">Chromebook</string>
+    <string name="text_transformer">Transformer</string>
+    <string name="text_pc_other">Other</string>
+    
+    <string name="button_take">Take</string>
     
     <!-- Toasts -->
     <string name="error_qr_content">Invalid content of the QR Code</string>
@@ -32,10 +55,12 @@
     <string name="error_no_id_selected">Select an ID first</string>
     <string name="error_already_checked_in">User already checked in</string>
     <string name="error_already_checked_out">User already not checked in</string>
+    <string name="error_market">Cannot open Play Store and get QR Code scanner app</string>
+    <string name="error_already_taken">This assistance is already taken</string>
     
     <!-- Preferences -->
     <string name="pref_server_url">Server REST URL</string>
-    <string name="pref_username">Server username</string>
-    <string name="pref_password">Server password</string>
+    <string name="pref_username">User</string>
+    <string name="pref_password">Password</string>
 
 </resources>

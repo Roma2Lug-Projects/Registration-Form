@@ -5,14 +5,9 @@ package it.mrmodd.registrationform;
 * on behalf of Roma2LUG (http://lug.uniroma2.it/)                         *
 \*************************************************************************/
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
+import it.mrmodd.registrationform.network.NetConnection;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -26,7 +21,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,18 +31,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainFragment extends Fragment {
+	public static final String SERIAL_PATTERN = "[a-z0-9]{16}";
 	private Button buttonQR;
 	private Button buttonID;
 	private Button buttonAccept;
 	private Button buttonRemove;
 	private Button buttonCancel;
+	private Button buttonAssistance;
 	
 	private TextView textViewCurrentID;
 	
 	private EditText editTextID;
 	
-	private Integer currentID = 0;
+	private String currentID = "";
 	private JSONObject currentJSON = null;
+	private boolean hasAssistance = false;
 	
 	
 	@Override
@@ -62,6 +59,7 @@ public class MainFragment extends Fragment {
 		buttonAccept = (Button) v.findViewById(R.id.button_accept);
 		buttonRemove = (Button) v.findViewById(R.id.button_remove);
 		buttonCancel = (Button) v.findViewById(R.id.button_cancel);
+		buttonAssistance = (Button) v.findViewById(R.id.button_assistance);
 		
 		textViewCurrentID = (TextView) v.findViewById(R.id.text_currentID);
 		
@@ -78,15 +76,21 @@ public class MainFragment extends Fragment {
 
 				    startActivityForResult(intent, 0);
 
-				} catch (Exception e) {
-
-				    Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-				    Intent marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
-				    
+				} catch (android.content.ActivityNotFoundException e) {
+					/* Required QR Code app */
+					
 				    cleanScreen();
-				    
-				    startActivity(marketIntent);
 
+					Intent marketIntent = null;
+					try {
+					    Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+					    marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
+				    	startActivity(marketIntent);
+					} catch (android.content.ActivityNotFoundException e1) {
+					    Uri marketUri = Uri.parse("https://play.google.com/store/apps/details?id=com.google.zxing.client.android");
+					    marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
+				    	startActivity(marketIntent);
+					}
 				}
 			}
 			
@@ -102,16 +106,13 @@ public class MainFragment extends Fragment {
 					Toast.makeText(getActivity(), R.string.error_empty_field, Toast.LENGTH_SHORT).show();
 					return;
 				}
-				if (!id.matches("[0-9]+")) {
+				if (!id.matches(SERIAL_PATTERN)) {
 					Toast.makeText(getActivity(), R.string.error_invalid_field, Toast.LENGTH_SHORT).show();
 					return;
 				}
 				
-				editTextID.setText("");
-				
 				cleanScreen();
-				
-				currentID = Integer.parseInt(id);
+				currentID = id;
         		new RetrieveDetails().execute();
 				
 			}
@@ -123,7 +124,7 @@ public class MainFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				
-				if (currentID == 0) {
+				if (currentID.length() == 0) {
 					Toast.makeText(getActivity(), R.string.error_no_id_selected, Toast.LENGTH_SHORT).show();
 					return;
 				}
@@ -138,7 +139,7 @@ public class MainFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				
-				if (currentID == 0) {
+				if (currentID.length() == 0) {
 					Toast.makeText(getActivity(), R.string.error_no_id_selected, Toast.LENGTH_SHORT).show();
 					return;
 				}
@@ -159,6 +160,23 @@ public class MainFragment extends Fragment {
 			
 		});
 		
+		buttonAssistance.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				
+				if (currentID.length() != 0) {
+					Intent assistances = new Intent(getActivity(), ActivityAssistances.class);
+					assistances.putExtra("id", currentID);
+					startActivity(assistances);
+				}
+				else {
+					buttonAssistance.setEnabled(false);
+				}
+			}
+			
+		});
+		
 		return v;
 	}
 	
@@ -169,9 +187,10 @@ public class MainFragment extends Fragment {
 
 	        if (resultCode == Activity.RESULT_OK) {
 	        	String qr = data.getStringExtra("SCAN_RESULT");
-	        	if (qr.matches("[0-9]+")) {
-	        		
-	        		currentID = Integer.parseInt(qr);
+	        	if (qr.matches(SERIAL_PATTERN)) {
+
+					cleanScreen();
+	        		currentID = qr;
 	        		new RetrieveDetails().execute();
 	        		
 	        	}
@@ -179,68 +198,19 @@ public class MainFragment extends Fragment {
 	        		Toast.makeText(getActivity(), R.string.error_qr_content, Toast.LENGTH_SHORT).show();
 	        }
 	        if(resultCode == Activity.RESULT_CANCELED){
-	            //handle cancel
+	            // There's nothing to do
 	        }
 	    }
 	}
 	
 	private void cleanScreen() {
-		currentID = 0;
+		currentID = "";
 		currentJSON = null;
 		textViewCurrentID.setText(R.string.text_empty);
 		editTextID.setText("");
-	}
-	
-	private HttpURLConnection enstablishConnection(String method, String file) throws IOException {
-		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		
-		String url_pref = pref.getString(getActivity().getString(R.string.pref_key_server_url), "");
-		String credentials = pref.getString(getActivity().getString(R.string.pref_key_username), "")
-								+ ":"
-								+ pref.getString(getActivity().getString(R.string.pref_key_password), "");
-		URL url;
-		HttpURLConnection connection;
-		
-		url = new URL(url_pref + file);
-		
-		connection = (HttpURLConnection) url.openConnection();
-		connection.setRequestMethod(method);
-		
-		if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT"))
-			connection.setDoOutput(true);
-		connection.setDoInput(true);
-		
-		connection.setRequestProperty("Authorization", "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.DEFAULT));
-		
-		return connection;
-	}
-	
-	private String fetchJSON(HttpURLConnection conn) throws IOException {
-		InputStream content = conn.getInputStream();
-		BufferedReader in = new BufferedReader (new InputStreamReader(content));
-		String line;
-		String json = "";
-		while ((line = in.readLine()) != null) {
-			json += line;
-		}
-		content.close();
-		in.close();
-		
-		return json;
-	}
-	
-	private void writeJSON(HttpURLConnection conn, String json) throws IOException {
-		
-		conn.setRequestProperty("Content-Type", "application/json");
-		conn.setRequestProperty("Content-Length", "" + json.getBytes("UTF-8").length);
-		
-		OutputStream os = conn.getOutputStream();
-		DataOutputStream dos = new DataOutputStream(os);
-		dos.write(json.getBytes("UTF-8"));
-		dos.flush();
-		dos.close();
-		os.close();
-		
+		buttonAssistance.setEnabled(false);
+		buttonAssistance.setText(R.string.button_assistance_def);
+		hasAssistance = false;
 	}
 	
 	class RetrieveDetails extends AsyncTask<Void, String, String> {
@@ -248,14 +218,24 @@ public class MainFragment extends Fragment {
 		@Override
 		protected String doInBackground(Void... params) {
 			String newtext = null;
+			NetConnection conn = null;
+
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+			String server = pref.getString(getActivity().getString(R.string.pref_key_server_url), "");
+			String user = pref.getString(getActivity().getString(R.string.pref_key_username), "");
+			String pass = pref.getString(getActivity().getString(R.string.pref_key_password), "");
 			
-			HttpURLConnection conn = null;
+			if (!server.endsWith("/"))
+				server += "/";
+			
 			try {
-				conn = enstablishConnection("GET", currentID.toString() + "/");
+				
+				conn = new NetConnection("GET", server + NetConnection.PARTICIPANTS_PATH + currentID + "/");
+				conn.setCredential(user, pass);
 				
 				if (conn.getResponseCode() == 200) {
 					
-					String json = fetchJSON(conn);
+					String json = conn.readString();
 
 					//Parse JSON
 					currentJSON = new JSONObject(json);
@@ -268,7 +248,7 @@ public class MainFragment extends Fragment {
 					String checkin = (!currentJSON.getString("check_in").matches("null")) ? currentJSON.getString("check_in") : "--";
 					String comments = currentJSON.getString("comments");
 
-					newtext = getActivity().getString(R.string.text_currentID) + " " + currentID.toString() + "\n";
+					newtext = getActivity().getString(R.string.text_currentID) + " " + currentID + "\n";
 					newtext += getActivity().getString(R.string.text_name) + " " + first_name + "\n";
 					newtext += getActivity().getString(R.string.text_lastname) + " " + last_name + "\n";
 					newtext += getActivity().getString(R.string.text_email) + " " + email + "\n";
@@ -293,6 +273,24 @@ public class MainFragment extends Fragment {
 					conn.disconnect();
 			}
 			
+			// Check if this ID has an assistance
+			try {
+				
+				conn = new NetConnection("HEAD", server + NetConnection.ASSISTANCES_PATH + currentID + "/");
+				conn.setCredential(user, pass);
+				
+				if (conn.getResponseCode() == 200) {
+					hasAssistance = true;
+				}
+				
+			} catch (IOException | IllegalArgumentException e) {
+				publishProgress(getActivity().getString(R.string.error_connection));
+				e.printStackTrace();
+			} finally {
+				if (conn != null)
+					conn.disconnect();
+			}
+			
 			return newtext;
 		}
 		
@@ -305,6 +303,10 @@ public class MainFragment extends Fragment {
 		protected void onPostExecute(String result) {
 			if (result != null)
 				textViewCurrentID.setText(result);
+			if (hasAssistance) {
+				buttonAssistance.setEnabled(true);
+				buttonAssistance.setText(R.string.button_assistance);
+			}
 		}
 	}
 	
@@ -312,10 +314,19 @@ public class MainFragment extends Fragment {
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			NetConnection conn = null;
+
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+			String server = pref.getString(getActivity().getString(R.string.pref_key_server_url), "");
+			String user = pref.getString(getActivity().getString(R.string.pref_key_username), "");
+			String pass = pref.getString(getActivity().getString(R.string.pref_key_password), "");
 			
-			HttpURLConnection conn = null;
+			if (!server.endsWith("/"))
+				server += "/";
+			
 			try {
-				conn = enstablishConnection("PUT", currentID.toString() + "/");
+				conn = new NetConnection("PUT", server + NetConnection.PARTICIPANTS_PATH + currentID + "/");
+				conn.setCredential(user, pass);
 				
 				if (currentJSON != null) {
 					if (!currentJSON.getString("check_in").matches("null"))
@@ -324,11 +335,10 @@ public class MainFragment extends Fragment {
 						String date = new java.sql.Timestamp(new Date().getTime()).toString();
 						currentJSON.put("check_in", date);
 						
-						writeJSON(conn, currentJSON.toString());
+						conn.writeString(currentJSON.toString());
 						
 						if (conn.getResponseCode() == 200) {
 							publishProgress(conn.getResponseMessage());
-							fetchJSON(conn);
 						}
 						else
 							publishProgress(getActivity().getString(R.string.error_server_code) + "\n" + conn.getResponseCode() + ": " + conn.getResponseMessage());
@@ -363,10 +373,19 @@ public class MainFragment extends Fragment {
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			NetConnection conn = null;
+
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+			String server = pref.getString(getActivity().getString(R.string.pref_key_server_url), "");
+			String user = pref.getString(getActivity().getString(R.string.pref_key_username), "");
+			String pass = pref.getString(getActivity().getString(R.string.pref_key_password), "");
 			
-			HttpURLConnection conn = null;
+			if (!server.endsWith("/"))
+				server += "/";
+			
 			try {
-				conn = enstablishConnection("PUT", currentID.toString() + "/");
+				conn = new NetConnection("PUT", server + NetConnection.PARTICIPANTS_PATH + currentID + "/");
+				conn.setCredential(user, pass);
 				
 				if (currentJSON != null) {
 					
@@ -375,11 +394,10 @@ public class MainFragment extends Fragment {
 					else {
 						currentJSON.put("check_in", JSONObject.NULL);
 						
-						writeJSON(conn, currentJSON.toString());
+						conn.writeString(currentJSON.toString());
 						
 						if (conn.getResponseCode() == 200) {
 							publishProgress(conn.getResponseMessage());
-							fetchJSON(conn);
 						}
 						else
 							publishProgress(getActivity().getString(R.string.error_server_code) + "\n" + conn.getResponseCode() + ": " + conn.getResponseMessage());

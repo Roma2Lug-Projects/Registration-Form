@@ -18,7 +18,7 @@
 <body>
 	<div class="center">
 		<h1>ID: {{ qr_id }}</h1>
-		<img src="{% url 'qrpng' qr_id %}" />
+		<img src="{% url 'qrcodes:qrpng' qr_id %}" />
 	</div>
 </body>
 

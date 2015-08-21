@@ -20,6 +20,29 @@
     <string name="button_accept">Registra</string>
     <string name="button_remove">Rimuovi</string>
     <string name="button_cancel">Annulla</string>
+    <string name="button_assistance_def">Nessuna assistenza registrata</string>
+    <string name="button_assistance">Mostra i dettagli dell\'assistenza</string>
+    
+    <!-- FragmentAssistances -->
+    <string name="text_accepted">Accettato</string>
+    <string name="text_refused">Rifiutato</string>
+    <string name="text_pctype">Tipo PC:</string>
+    <string name="text_brand">Marca:</string>
+    <string name="text_model">Modello:</string>
+    <string name="text_cpu">CPU:</string>
+    <string name="text_ram">RAM:</string>
+    <string name="text_problem">Problema:</string>
+    <string name="text_acceptance">Accettazione:</string>
+    <string name="text_accepted_time">Ora prenotazione:</string>
+    <string name="text_mttr">MTTR:</string>
+    <string name="text_operator">Operatore:</string>
+    <string name="text_desktop">Fisso</string>
+    <string name="text_laptop">Portatile</string>
+    <string name="text_chromebook">Chromebook</string>
+    <string name="text_transformer">Trasformabile</string>
+    <string name="text_pc_other">Altro</string>
+    
+    <string name="button_take">Prendi assistenza</string>
     
     <!-- Toasts -->
     <string name="error_qr_content">Contenuto del QR Code non valido</string>
@@ -32,6 +55,8 @@
     <string name="error_no_id_selected">Selezionare prima un ID</string>
     <string name="error_already_checked_in">Utente già acceduto</string>
     <string name="error_already_checked_out">Utente non ancora acceduto</string>
+    <string name="error_market">Impossibile aprire il Play Store per installare l\'app di scansione dei QR Code</string>
+    <string name="error_already_taken">Questa assistenza è già stata presa</string>
     
     <!-- Preferences -->
     <string name="pref_server_url">URL del server REST</string>

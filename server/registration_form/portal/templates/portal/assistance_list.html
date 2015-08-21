@@ -1,0 +1,38 @@
+{% extends 'portal/base_template.html' %}
+{% load staticfiles %}
+{% load portal_filters %}{# See templatetags/portal_filters.py for filter definition #}
+
+{% block description %}Linux Day{% endblock %}
+{% block title %}Lista partecipanti{% endblock %}
+{% block content %}
+
+		<div class="row">
+			<div class="col-sm-12"><h2>{{ message }}</h2></div>
+		</div>
+		
+		<div class="row">
+			<div class="col-sm-12 scroll">
+				<table class="table table-striped table-bordered">
+					<thead>
+						<tr>
+							<th>ID</th><th>Cognome</th><th>Nome</th><th>Tipo PC</th><th>Accettazione</th><th>Ora di inizio</th><th>MTTR</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for a in assistances %}
+						<tr>
+							<th><a href="{% url 'portal:assistance_details' participant_id=a.participant__participant_id %}">{{ a.participant__participant_id }}</a></th>
+							<th>{{ a.participant__last_name }}</th>
+							<th>{{ a.participant__first_name }}</th>
+							<th>{{ a.pc_type|pc_type }}</th>{# See templatetags/portal_filters.py for filter definition #}
+							<th>{{ a.acceptance|acceptance_status }}</th>{# See templatetags/portal_filters.py for filter definition #}
+							<th>{{ a.accepted_time }}</th>
+							<th>{{ a.estimated_mttr }} ore</th>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		
+{% endblock %}

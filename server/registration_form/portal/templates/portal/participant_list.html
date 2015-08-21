@@ -1,0 +1,37 @@
+{% extends 'portal/base_template.html' %}
+{% load staticfiles %}
+
+{% block description %}Linux Day{% endblock %}
+{% block title %}Lista partecipanti{% endblock %}
+{% block content %}
+
+		<div class="row">
+			<div class="col-sm-12"><h2>{{ message }}</h2></div>
+		</div>
+		
+		<div class="row">
+			<div class="col-sm-12 scroll">
+				<table class="table table-striped table-bordered">
+					<thead>
+						<tr>
+							<th>ID</th><th>Cognome</th><th>Nome</th><th>Mattina</th><th>Pomeriggio</th><th>Data reg.</th><th>Mailing List</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for p in participants %}
+						<tr>
+							<th><a href="{% url 'portal:participant_details' participant_id=p.participant_id %}">{{ p.participant_id }}</a></th>
+							<th>{{ p.last_name }}</th>
+							<th>{{ p.first_name }}</th>
+							<th>{{ p.participate_morning }}</th>
+							<th>{{ p.participate_afternoon }}</th>
+							<th>{{ p.registration_date }}</th>
+							<th>{{ p.mailing_list }}</th>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		
+{% endblock %}
