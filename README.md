@@ -81,15 +81,15 @@ If the server URL is http://example.com:8080/, these URLs are available:
 - You need to install Apache server (but not an entire LAMP server). On Ubuntu or Debian
   install apache2 and libapache2-mod-wsgi:
 
-		~# apt-get install apache2 libapache2-mod-wsgi
+		~# apt-get install apache2 libapache2-mod-wsgi-py3
 
-- Now you need Python virtualenv and pip:
+- Now you need Python virtualenv:
 
-		~# apt-get install python-virtualenv python-pip
+		~# apt-get install python-virtualenv
 
-- Some Python packages also require python-dev and python-setuptools:
+- Some Python packages also require python3-dev, python3-setuptools and gcc:
 
-		~# apt-get install python-dev python-setuptools
+		~# apt-get install python3-dev python3-setuptools build-essential
 
 - Move *server/registration_form/registration_form/local_settings.py.example* in
   *server/registration_form/registration_form/local_settings.py*:
@@ -99,11 +99,13 @@ If the server URL is http://example.com:8080/, these URLs are available:
 
 - Modify this file with your data. Next steps assume you DIDN'T modify *STATIC_ROOT* and
   *STATIC_URL* variables
+
 - Copy *server/registration_form* in */var/www/*:
 
 		~# cp -r server/registration_form /var/www
 
 - Edit file *server/environment* and change *SERV_PATH* from *"."* to *"/var/www"*
+
 - Build virtual environment executing script *server/create-environment.sh*, afterward you
   should see a new *virtual* folder in */var/www/*:
 
@@ -121,18 +123,18 @@ If the server URL is http://example.com:8080/, these URLs are available:
 - Keep in mind these paths you should have:
 - - */var/www/static/*
 - - */var/www/registration_form/registration_form/wsgi.py*
-- - */var/www/virtual/lib/python2.7/site-packages/*
+- - */var/www/virtual/lib/python3.4/site-packages/*
 - Now we need to edit Apache sites configuration file:
 - - In */etc/apache2/sites-enabled/* folder you should have a symbolic link called
     *000-default.conf* or similar
 - - Open it and find *<VirtualHost *:80>* section
-- - Remove all the content and add next lines:
+- - Remove all the content of the tag and add next lines:
 
 ```
 #!bash
 
 		WSGIScriptAlias / /var/www/registration_form/registration_form/wsgi.py
-		WSGIDaemonProcess localhost python-path=/var/www/registration_form:/var/www/virtual/lib/python2.7/site-packages
+		WSGIDaemonProcess localhost python-path=/var/www/registration_form:/var/www/virtual/lib/python3.4/site-packages
 		WSGIProcessGroup localhost
 
 		WSGIPassAuthorization On
