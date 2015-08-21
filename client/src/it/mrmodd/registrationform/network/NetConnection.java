@@ -25,7 +25,6 @@ public class NetConnection {
 	public static final String PARTICIPANTS_PATH = "participants/";
 	public static final String ASSISTANCES_PATH = "assistances/";
 	
-	// TODO Test secure connection
 	private HttpURLConnection connection;
 	
 	static {
@@ -37,8 +36,11 @@ public class NetConnection {
 		
 		if (url.startsWith("https")) {
 			connection = (HttpsURLConnection) urlObj.openConnection();
-		} else
+			Log.d("NetConnection", "Opening a secure connection");
+		} else {
 			connection = (HttpURLConnection) urlObj.openConnection();
+			Log.d("NetConnection", "Opening an insecure connection");
+		}
 		
 		connection.setRequestMethod(method);
 		
@@ -92,16 +94,19 @@ public class NetConnection {
 	}
 	
 	public void disconnect() {
+		Log.d("NetConnection", "Disconnecting from the server");
 		connection.disconnect();
 	}
 	
 	private static void init_SSLSocket() {
+		Log.d("NetConnection", "Setting up SSL socket options");
 		
 		// Disable hostname checking for server url into the SSL certificate
 		HttpsURLConnection.setDefaultHostnameVerifier(new javax.net.ssl.HostnameVerifier(){
 
 			@Override
 			public boolean verify(String arg0, SSLSession arg1) {
+				Log.d("NetConnection", "Hostname from SSL cert: " + arg0);
 				return true;
 			}
 			
@@ -137,7 +142,7 @@ public class NetConnection {
 		    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		    
 		} catch (NoSuchAlgorithmException | KeyManagementException e) {
-			Log.e("Connection", "Error setting up SSL connectiton.");
+			Log.e("NetConnection", "Error setting up SSL connectiton.");
 		}
 	}
 }

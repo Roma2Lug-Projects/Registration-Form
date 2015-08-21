@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -264,10 +265,10 @@ public class MainFragment extends Fragment {
 				
 			} catch (IOException | IllegalArgumentException e) {
 				publishProgress(getActivity().getString(R.string.error_connection));
-				e.printStackTrace();
+				Log.e("MainFragment", "Connection error: " + e.getMessage());
 			} catch (JSONException e) {
 				publishProgress(getActivity().getString(R.string.error_invalid_response));
-				e.printStackTrace();
+				Log.e("MainFragment", "Error parsing JSON response: " + e.getMessage());
 			} finally {
 				if (conn != null)
 					conn.disconnect();
@@ -285,7 +286,7 @@ public class MainFragment extends Fragment {
 				
 			} catch (IOException | IllegalArgumentException e) {
 				publishProgress(getActivity().getString(R.string.error_connection));
-				e.printStackTrace();
+				Log.e("MainFragment", "Connection error: " + e.getMessage());
 			} finally {
 				if (conn != null)
 					conn.disconnect();
@@ -347,10 +348,10 @@ public class MainFragment extends Fragment {
 				
 			} catch (IOException | IllegalArgumentException e) {
 				publishProgress(getActivity().getString(R.string.error_connection));
-				e.printStackTrace();
+				Log.e("MainFragment", "Connection error: " + e.getMessage());
 			} catch (JSONException e) {
 				publishProgress(getActivity().getString(R.string.error_internal_error));
-				e.printStackTrace();
+				Log.e("MainFragment", "Error parsing JSON response: " + e.getMessage());
 			} finally {
 				conn.disconnect();
 			}
@@ -407,10 +408,10 @@ public class MainFragment extends Fragment {
 				
 			} catch (IOException | IllegalArgumentException e) {
 				publishProgress(getActivity().getString(R.string.error_connection));
-				e.printStackTrace();
+				Log.e("MainFragment", "Connection error: " + e.getMessage());
 			} catch (JSONException e) {
 				publishProgress(getActivity().getString(R.string.error_internal_error));
-				e.printStackTrace();
+				Log.e("MainFragment", "Error parsing JSON response: " + e.getMessage());
 			} finally {
 				conn.disconnect();
 			}
