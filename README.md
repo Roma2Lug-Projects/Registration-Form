@@ -135,15 +135,19 @@ The following REST interfaces are available:
 
 - Now you need to edit Apache sites configuration file:
 - - Copy the config file from server folder into Apache:
+
 		~# cp server/apache-django.conf /etc/apache2/sites-available/
+
 - - Remember to change */var/www/static* path if you changed it in *local_settings.py* file
 - - Enable SSL module:
+
 		~# a2enmod ssl
+
 - - Disable default configurations and enable the correct one:
+
 		~# a2dissite 000-default.conf
 		~# a2dissite default-ssl.conf
 		~# a2ensite apache-django.conf
-
 
 - Finally give correct permissions to the folder:
 
