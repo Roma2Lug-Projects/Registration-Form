@@ -88,26 +88,27 @@ The following REST interfaces are available:
 ### Installation guide with Apache
 
 - You need to install Apache server (but not an entire LAMP server). On Ubuntu or Debian
-  install apache2 and libapache2-mod-wsgi:
+  install apache2 and libapache2-mod-wsgi-py3:
 
-		~# apt-get install apache2 libapache2-mod-wsgi
+		~# apt-get install apache2 libapache2-mod-wsgi-py3
 
 - Now you need Python virtualenv:
 
 		~# apt-get install python-virtualenv
 
-- Some Python packages also require python3-dev and python3-setuptools:
+- Some Python packages also require python3-dev, python3-setuptools and gcc:
 
-		~# apt-get install python3-dev python3-setuptools
+		~# apt-get install python3-dev python3-setuptools build-essential
 
 - Move *server/registration_form/registration_form/local_settings.py.example* in
   *server/registration_form/registration_form/local_settings.py*:
 
 		~$ mv server/registration_form/registration_form/local_settings.py.example\
-		~$ server/registration_form/registration_form/local_settings.py
+		 > server/registration_form/registration_form/local_settings.py
 
 - Modify this file with your data. Next steps assume you DIDN'T modify *STATIC_ROOT* and
   *STATIC_URL* variables
+
 - Copy *server/registration_form* in */var/www/*:
 
 		~# cp -r server/registration_form /var/www
@@ -130,36 +131,19 @@ The following REST interfaces are available:
 - Keep in mind these paths you should have:
 - - */var/www/static/*
 - - */var/www/registration_form/registration_form/wsgi.py*
-- - */var/www/virtual/lib/python2.7/site-packages/*
-- Now we need to edit Apache sites configuration file:
-- - In */etc/apache2/sites-enabled/* folder you should have a symbolic link called
-    *000-default.conf* or similar
-- - Open it and find *<VirtualHost *:80>* section
-- - Remove all the content and add next lines:
+- - */var/www/virtual/lib/python3.4/site-packages/*
 
-```
-#!bash
-
-		WSGIScriptAlias / /var/www/registration_form/registration_form/wsgi.py
-		WSGIDaemonProcess localhost python-path=/var/www/registration_form:/var/www/virtual/lib/python2.7/site-packages
-		WSGIProcessGroup localhost
-
-		WSGIPassAuthorization On
-
-		Alias /static/ /var/www/static/
-		
-		<Directory /var/www/static>
-			Require all granted
-		</Directory>
-		
-		<Directory /var/www/registration_form/registration_form>
-			<Files wsgi.py>
-				Require all granted
-			</Files>
-		</Directory>
-```
-
+- Now you need to edit Apache sites configuration file:
+- - Copy the config file from server folder into Apache:
+		~# cp server/apache-django.conf /etc/apache2/sites-available/
 - - Remember to change */var/www/static* path if you changed it in *local_settings.py* file
+- - Enable SSL module:
+		~# a2enmod ssl
+- - Disable default configurations and enable the correct one:
+		~# a2dissite 000-default.conf
+		~# a2dissite default-ssl.conf
+		~# a2ensite apache-django.conf
+
 
 - Finally give correct permissions to the folder:
 
@@ -169,7 +153,14 @@ The following REST interfaces are available:
 
 		~# service apache2 restart
 
-- Now you should navigate typing http://localhost/
+- Now you should navigate typing http://localhost/ or https://localhost/
+
+- Optionally change the Apache default self-signed certificates with new ones:
+
+		~# openssl req -new -x509 -days 365 -nodes -out /etc/ssl/certs/apache-django.pem -keyout /etc/ssl/private/apache-django.key
+
+  and then change the paths of these files in */etc/apache2/sites-available/apache-django.conf* file you previously
+  copied. In particular change **SSLCertificateFile** and **SSLCertificateKeyFile** directives.
 
 ## Client
 
