@@ -22,8 +22,9 @@ import android.util.Base64;
 import android.util.Log;
 
 public class NetConnection {
-	public static final String PARTICIPANTS_PATH = "participants/";
-	public static final String ASSISTANCES_PATH = "assistances/";
+	public static final String BASE_PATH = "rest/";
+	public static final String PARTICIPANTS_PATH = BASE_PATH + "participants/";
+	public static final String ASSISTANCES_PATH = BASE_PATH + "assistances/";
 	
 	private HttpURLConnection connection;
 	
