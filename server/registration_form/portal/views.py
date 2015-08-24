@@ -70,7 +70,10 @@ def send_registration_email(participant):
 	
 	# Compose email
 	subject = 'ID registrazione Linux Day Roma 2015'
-	from_email = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
+	try:
+		from_email = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
+	except AttributeError:
+		from_email = settings.EMAIL_HOST_USER
 	to_email = str(participant) + ' <' + participant.email + '>'
 	
 	text = 'Caro ' + participant.first_name + ',\n'
@@ -101,12 +104,15 @@ def send_registration_email(participant):
 	image.add_header('Content-ID', '<qrcode>') # This is the ID used in tag <img> for HTML part of the email
 	mail.attach(image)
 	
-	mail.send(fail_silently=True)
+	mail.send(fail_silently=False)
 
 def send_assistance_email(assistance):
 	# Compose email
 	subject = 'Linux Day 2015: aggiornamento stato richiesta di assistenza'
-	from_email = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
+	try:
+		from_email = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
+	except AttributeError:
+		from_email = settings.EMAIL_HOST_USER
 	to_email = str(assistance.participant) + ' <' + assistance.participant.email + '>'
 	
 	status = '--'
@@ -134,11 +140,14 @@ def send_assistance_email(assistance):
 		html += 'comunicando il tuo ID di registrazione: <b>' + assistance.participant.participant_id + '</b>.</p>\n'
 	html += '<p>A presto,<br />Roma2LUG e LugRoma3.</p>\n'
 	
-	send_mail(subject, text, from_email, [to_email,], fail_silently=True, html_message=html)
+	send_mail(subject, text, from_email, [to_email,], fail_silently=False, html_message=html)
 
 # Send a generic email to participant(s)
 def send_email(participants, subject, message):
-	from_email = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
+	try:
+		from_email = settings.EMAIL_CANONICAL_NAME + ' <' + settings.EMAIL_HOST_USER + '>'
+	except AttributeError:
+		from_email = settings.EMAIL_HOST_USER
 	
 	email_list = []
 	for p in participants:
@@ -146,7 +155,7 @@ def send_email(participants, subject, message):
 		email_list.append((subject, message, from_email, [email,]))
 	email_tuples = tuple(email_list)
 	
-	send_mass_mail(email_tuples, fail_silently=True)
+	send_mass_mail(email_tuples, fail_silently=False)
 
 # Given a search keyword(s) find all possible participants that match
 def do_search(query):
