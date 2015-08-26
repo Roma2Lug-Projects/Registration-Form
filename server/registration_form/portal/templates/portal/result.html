@@ -10,12 +10,12 @@
 		<div class="row">
 			<div class="col-sm-12"><h3>
 				Ti abbiamo inviato un'email all'indirizzo indicato con il tuo codice univoco di registrazione<br />
-				e un QR Code che dovrai mostrare all'ingresso anche dallo schermo del cellulare.<br />
+				e un QR Code che dovrai mostrare all'ingresso anche dallo schermo del tuo cellulare.<br />
 			</h3></div>
 		</div>
 		<div class="row">
 			<div class="col-sm-12"><h3>
-				Se non dovesse esserti arrivata l'email stampa questa pagina oppure salvati il seguente codice e l'immagine:
+				Se non dovesse arrivatti l'email stampa questa pagina oppure conserva il seguente codice con l'immagine:
 			</h3></div>
 		</div>
 		<div class="row">
@@ -23,6 +23,14 @@
 				<h2>ID: <b>{{ reg_id }}</b><br /><img src="{% url 'qrcodes:qrpng' reg_id %}" alt="{{ reg_id }}" /></h2>
 			</div>
 		</div>
+		{% if not assistances_disabled %}
+		<div class="row">
+			<div class="col-sm-12">
+				<h3>Vuoi ricevere assistenza durante il Linux Day? Compila il nostro modulo a <a href="{% url 'portal:assistance_form' %}">questo indirizzo</a>.
+			</div>
+		</div>
+		{% endif %}
+		<legend style="padding-top: 20px;"></legend>
 		<div class="row">
 			<div class="col-sm-12">
 				<div class="comment">Visita il nostro portale dedicato al <a href="http://lug.uniroma2.it/ld15">Linux Day 2015</a> per essere informato sullo stato dei lavori!</div>

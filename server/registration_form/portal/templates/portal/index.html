@@ -100,6 +100,14 @@
 				</div>
 			</div>
 		</form>
+		{% if not assistances_disabled %}
+		<legend style="padding-top: 20px;"></legend>
+		<div class="row">
+			<div class="col-sm-10 col-lg-10 col-sm-offset-2 comment">
+				Vuoi ricevere assistenza durante il Linux Day? Registrati e poi compila il nostro modulo a <a href="{% url 'portal:assistance_form' %}">questo indirizzo</a>.
+			</div>
+		</div>
+		{% endif %}
 	{% endif %}
 {% endif %}
 		
