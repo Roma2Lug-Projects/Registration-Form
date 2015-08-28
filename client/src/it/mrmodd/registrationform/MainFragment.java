@@ -264,11 +264,13 @@ public class MainFragment extends Fragment {
 				}
 				
 			} catch (IOException | IllegalArgumentException e) {
-				publishProgress(getActivity().getString(R.string.error_connection));
 				Log.e("MainFragment", "Connection error: " + e.getMessage());
+				if (getActivity() != null)
+					publishProgress(getActivity().getString(R.string.error_connection));
 			} catch (JSONException e) {
-				publishProgress(getActivity().getString(R.string.error_invalid_response));
 				Log.e("MainFragment", "Error parsing JSON response: " + e.getMessage());
+				if (getActivity() != null)
+					publishProgress(getActivity().getString(R.string.error_invalid_response));
 			} finally {
 				if (conn != null)
 					conn.disconnect();
@@ -285,8 +287,9 @@ public class MainFragment extends Fragment {
 				}
 				
 			} catch (IOException | IllegalArgumentException e) {
-				publishProgress(getActivity().getString(R.string.error_connection));
 				Log.e("MainFragment", "Connection error: " + e.getMessage());
+				if (getActivity() != null)
+					publishProgress(getActivity().getString(R.string.error_connection));
 			} finally {
 				if (conn != null)
 					conn.disconnect();
@@ -347,11 +350,13 @@ public class MainFragment extends Fragment {
 				}
 				
 			} catch (IOException | IllegalArgumentException e) {
-				publishProgress(getActivity().getString(R.string.error_connection));
 				Log.e("MainFragment", "Connection error: " + e.getMessage());
+				if (getActivity() != null)
+					publishProgress(getActivity().getString(R.string.error_connection));
 			} catch (JSONException e) {
-				publishProgress(getActivity().getString(R.string.error_internal_error));
 				Log.e("MainFragment", "Error parsing JSON response: " + e.getMessage());
+				if (getActivity() != null)
+					publishProgress(getActivity().getString(R.string.error_internal_error));
 			} finally {
 				conn.disconnect();
 			}
@@ -407,11 +412,13 @@ public class MainFragment extends Fragment {
 				}
 				
 			} catch (IOException | IllegalArgumentException e) {
-				publishProgress(getActivity().getString(R.string.error_connection));
 				Log.e("MainFragment", "Connection error: " + e.getMessage());
+				if (getActivity() != null)
+					publishProgress(getActivity().getString(R.string.error_connection));
 			} catch (JSONException e) {
-				publishProgress(getActivity().getString(R.string.error_internal_error));
 				Log.e("MainFragment", "Error parsing JSON response: " + e.getMessage());
+				if (getActivity() != null)
+					publishProgress(getActivity().getString(R.string.error_internal_error));
 			} finally {
 				conn.disconnect();
 			}
