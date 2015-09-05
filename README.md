@@ -85,6 +85,20 @@ The following REST interfaces are available:
   SMTP server credentials, used to send emails. This is not present by default, you
   should copy the local_settings.py.example and edit the required fields
 
+### Notes about programs version
+
+Next section explains how to configure the current installation of Django with Apache.
+Note that this guide is intended for at least **Apache 2.4** and **Python 3.4**.
+If you have an older version of Apache (say Apache 2.2) you probably should change
+the configuration of file *server/apache-django.conf* replacing *Require all granted*
+with *Allow from all* every time it appears (4 times).
+At least Python 3 is required for this project, but if you have for example Python 3.2
+the *create-environment.sh* script probably will fail with an error on *pip3* program.
+If so try changing *pip3* with *pip-3.2* where it appears in the file (9 times). Moreover
+if you have Python 3.2 you should change virtual env path of Apache configuration file:
+in *server/apache-django.conf* on the lines starting with *WSGIDaemonProcess* change
+*.../virtual/lib/python3.4/...* in *.../virtual/lib/python3.2/...*.
+
 ### Installation guide with Apache
 
 - You need to install Apache server (but not an entire LAMP server). On Ubuntu or Debian
@@ -103,7 +117,7 @@ The following REST interfaces are available:
 - Move *server/registration_form/registration_form/local_settings.py.example* in
   *server/registration_form/registration_form/local_settings.py*:
 
-		~$ mv server/registration_form/registration_form/local_settings.py.example\
+		~$ cp server/registration_form/registration_form/local_settings.py.example\
 		 > server/registration_form/registration_form/local_settings.py
 
 - Modify this file with your data. Next steps assume you DIDN'T modify *STATIC_ROOT* and
