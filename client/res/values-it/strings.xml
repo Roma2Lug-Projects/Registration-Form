@@ -9,6 +9,7 @@
     <string name="text_currentID">ID:</string>
     <string name="text_name">Nome:</string>
     <string name="text_lastname">Cognome:</string>
+    <string name="text_tshirt">Maglietta:</string>
     <string name="text_email">Email:</string>
     <string name="text_morning">Mattina:</string>
     <string name="text_afternoon">Pomeriggio:</string>

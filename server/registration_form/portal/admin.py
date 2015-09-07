@@ -12,7 +12,7 @@ class ParticipantAdmin(admin.ModelAdmin):
 	fieldsets = [
 		('Participant',		{'fields': ['first_name', 'last_name', 'email', 'mailing_list']}),
 		('Presences',		{'fields': ['participate_morning', 'participate_afternoon']}),
-		('Registration',	{'fields': ['registration_date', 'check_in']}),
+		('Registration',	{'fields': ['registration_date', 'check_in', 'tshirt']}),
 		('Comments',		{'fields': ['comments',], 'classes': ['collapse']}),
 	]
 	
@@ -23,14 +23,15 @@ class ParticipantAdmin(admin.ModelAdmin):
 		'first_name',
 		'last_name',
 		'email',
+		'tshirt',
 		'mailing_list',
 		'participate_morning',
 		'participate_afternoon',
 		'registration_date',
 		'check_in']
 	
-	list_filter = ['participate_morning', 'participate_afternoon', 'check_in', 'mailing_list']
-	search_fields = ['participant_id', 'first_name', 'last_name', 'email',]
+	list_filter = ['participate_morning', 'participate_afternoon', 'tshirt', 'check_in', 'mailing_list']
+	search_fields = ['participant_id', 'first_name', 'last_name', 'email', 'tshirt',]
 	ordering = ['registration_date', 'check_in',]
 
 admin.site.register(Participant, ParticipantAdmin)

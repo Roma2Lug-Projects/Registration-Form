@@ -8,12 +8,24 @@ from django.conf import settings
 
 # Create your models here.
 class Participant(models.Model):
+	SIZE_S = 'S'
+	SIZE_M = 'M'
+	SIZE_L = 'L'
+	SIZE_XL = 'XL'
+	TSHIRT_SIZE = (
+			(SIZE_S, SIZE_S),
+			(SIZE_M, SIZE_M),
+			(SIZE_L, SIZE_L),
+			(SIZE_XL, SIZE_XL),
+	)
+	
 	participant_id = models.CharField(max_length=16, primary_key=True)
 	first_name = models.CharField(max_length=128)
 	last_name = models.CharField(max_length=128)
 	email = models.EmailField(unique=True)
 	
 	mailing_list = models.BooleanField(default=True)
+	tshirt = models.CharField(max_length=2, choices=TSHIRT_SIZE, blank=True, null=True)
 	
 	participate_morning = models.BooleanField(default=False)
 	participate_afternoon = models.BooleanField(default=False)

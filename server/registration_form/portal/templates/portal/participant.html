@@ -1,5 +1,6 @@
 {% extends 'portal/base_template.html' %}
 {% load staticfiles %}
+{% load portal_filters %}{# See templatetags/portal_filters.py for filter definition #}
 
 {% block description %}Linux Day{% endblock %}
 {% block title %}{{ p.first_name }} {{ p.last_name }}{% endblock %}
@@ -21,6 +22,9 @@
 						</tr>
 						<tr>
 							<th><b>Cognome</b>:</th><th>{{ p.last_name }}</th>
+						</tr>
+						<tr>
+							<th><b>Maglietta</b>:</th><th>{{ p.tshirt|tshirt_size }}</th>
 						</tr>
 						<tr>
 							<th><b>Mailing list</b>:</th><th>{% if p.mailing_list %}Si, <a href="{% url 'portal:email_sender' %}?id={{ p.participant_id }}">invia email</a>{% else %}No{% endif %}</th>

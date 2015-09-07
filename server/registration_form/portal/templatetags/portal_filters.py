@@ -21,3 +21,9 @@ def acceptance_status(status):
 		if s[0] == status:
 			return s[1]
 	return 'Pendente'
+
+@register.filter
+def tshirt_size(size):
+	if not size:
+		return 'Nessuna'
+	return size

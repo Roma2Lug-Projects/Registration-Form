@@ -6,7 +6,7 @@
 # Python basic libraries
 import threading
 from syslog import syslog as print
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 # Django components
 from django.conf import settings
@@ -51,6 +51,8 @@ DISABLE_EMAIL = settings.DEBUG
 #####################################################################################################
 
 # Support functions and classes
+
+tshirt_date = date(2015, 10, 5) # Consider accepted all reservation < date + 1 day
 
 def generateSerial():
 	chars = '0123456789abcdefghijklmnopqrstuvwxyz'
@@ -187,6 +189,13 @@ PARTICIPATIONS = [
 	[1, 'Pomeriggio'],
 	[2, 'Mattina e pomeriggio'],
 ]
+TSHIRT = [
+	['', 'Nessuna maglietta'],
+	[Participant.SIZE_S, Participant.SIZE_S],
+	[Participant.SIZE_M, Participant.SIZE_M],
+	[Participant.SIZE_L, Participant.SIZE_L],
+	[Participant.SIZE_XL, Participant.SIZE_XL],
+]
 
 # Registration form fields
 class RegistrationForm(forms.Form):
@@ -195,6 +204,8 @@ class RegistrationForm(forms.Form):
 	email = forms.EmailField(label='Email*', required=True)
 	participates = forms.ChoiceField(label='Partecipazione', choices=PARTICIPATIONS, required=False)
 	comments = forms.CharField(label='Commenti', max_length=512, widget=forms.Textarea, required=False)
+	tshirt = forms.ChoiceField(label='Prenota maglietta', help_text='Prezzo finale inferiore ai 10€. Attenzione, prenotazioni successive alla data '
+			+ tshirt_date.strftime("%d/%m/%y") + ' potrebbero non essere garantite.', choices=TSHIRT, initial=False, required=False)
 	mailing_list = forms.BooleanField(label='Consenti di ricevere email riguardanti il Linux Day come variazioni sul programma o eventi speciali.', initial=True, required=False)
 
 # Registration form fields for administrators
@@ -288,6 +299,9 @@ def index(request):
 			afternoon_users = Participant.objects.filter(participate_afternoon=True).count()
 			context['afternoon_users'] = afternoon_users
 			
+			tshirts = Participant.objects.filter(tshirt__isnull=False).exclude(tshirt__exact='').count()
+			context['tshirts'] = tshirts
+			
 			mailable_users = Participant.objects.filter(mailing_list=True).count()
 			context['mailable_users'] = mailable_users
 			
@@ -339,6 +353,7 @@ def index(request):
 							first_name = form.cleaned_data['first_name'],
 							last_name = form.cleaned_data['last_name'],
 							email = form.cleaned_data['email'],
+							tshirt = form.cleaned_data['tshirt'],
 							mailing_list = form.cleaned_data['mailing_list'],
 							comments = form.cleaned_data['comments'],
 							participate_morning = morning,
@@ -380,7 +395,7 @@ def admin_form(request):
 	
 	else:
 		form = AdminRegistrationForm(request.POST)
-
+		
 		if form.is_valid():
 			participant_id = getUniqueParticipantID()
 			
@@ -555,6 +570,46 @@ def query_search(request):
 	context['message'] = 'Risultati della ricerca'
 	
 	return render(request, 'portal/participant_list.html', context)
+
+# Tshirt view
+
+@require_http_methods(['GET'])
+@login_required
+def tshirts(request):
+	context = getBaseContext()
+	
+	d = tshirt_date + timedelta(days=1)
+	p = Participant.objects.filter(tshirt__isnull=False).exclude(tshirt__exact='')
+	
+	context['tshirts_s'] = p.filter(registration_date__lte=d, tshirt=Participant.SIZE_S).count()
+	context['tshirts_m'] = p.filter(registration_date__lte=d, tshirt=Participant.SIZE_M).count()
+	context['tshirts_l'] = p.filter(registration_date__lte=d, tshirt=Participant.SIZE_L).count()
+	context['tshirts_xl'] = p.filter(registration_date__lte=d, tshirt=Participant.SIZE_XL).count()
+	
+	participants = p.filter(registration_date__lte=d).values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'registration_date',
+			'tshirt').order_by('tshirt')
+	
+	context['participants'] = participants
+	
+	context['more_tshirts_s'] = p.filter(registration_date__gt=d, tshirt=Participant.SIZE_S).count()
+	context['more_tshirts_m'] = p.filter(registration_date__gt=d, tshirt=Participant.SIZE_M).count()
+	context['more_tshirts_l'] = p.filter(registration_date__gt=d, tshirt=Participant.SIZE_L).count()
+	context['more_tshirts_xl'] = p.filter(registration_date__gt=d, tshirt=Participant.SIZE_XL).count()
+	
+	more_participants = p.filter(registration_date__gt=d).values(
+			'participant_id',
+			'last_name',
+			'first_name',
+			'registration_date',
+			'tshirt').order_by('tshirt')
+	
+	context['more_participants'] = more_participants
+	
+	return render(request, 'portal/tshirts.html', context)
 
 # Email management
 

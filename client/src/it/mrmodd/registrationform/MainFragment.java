@@ -243,6 +243,7 @@ public class MainFragment extends Fragment {
 					
 					String first_name = currentJSON.getString("first_name");
 					String last_name = currentJSON.getString("last_name");
+					String tshirt = (!(currentJSON.getString("tshirt").matches("null") || currentJSON.getString("tshirt").length() == 0)) ? currentJSON.getString("tshirt") : "--";
 					String email = currentJSON.getString("email");
 					Boolean morning = currentJSON.getBoolean("participate_morning");
 					Boolean afternoon = currentJSON.getBoolean("participate_afternoon");
@@ -252,6 +253,7 @@ public class MainFragment extends Fragment {
 					newtext = getActivity().getString(R.string.text_currentID) + " " + currentID + "\n";
 					newtext += getActivity().getString(R.string.text_name) + " " + first_name + "\n";
 					newtext += getActivity().getString(R.string.text_lastname) + " " + last_name + "\n";
+					newtext += getActivity().getString(R.string.text_tshirt) + " " + tshirt + "\n";
 					newtext += getActivity().getString(R.string.text_email) + " " + email + "\n";
 					newtext += getActivity().getString(R.string.text_morning) + " " + morning + "\n";
 					newtext += getActivity().getString(R.string.text_afternoon) + " " + afternoon + "\n";

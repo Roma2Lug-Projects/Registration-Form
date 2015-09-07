@@ -11,8 +11,8 @@ from django.contrib.auth import get_user_model
 class ParticipantSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Participant
-		fields = ('participant_id', 'first_name', 'last_name', 'email', 'participate_morning', 'participate_afternoon', 'registration_date', 'check_in', 'comments')
-		read_only_fields = ('participant_id', 'first_name', 'last_name', 'email', 'participate_morning', 'participate_afternoon', 'registration_date', 'comments')
+		fields = ('participant_id', 'first_name', 'last_name', 'tshirt', 'email', 'participate_morning', 'participate_afternoon', 'registration_date', 'check_in', 'comments')
+		read_only_fields = ('participant_id', 'first_name', 'last_name', 'tshirt', 'email', 'participate_morning', 'participate_afternoon', 'registration_date', 'comments')
 
 class AssistanceSerializer(serializers.ModelSerializer):
 	participant = serializers.SlugRelatedField(read_only=True, slug_field='participant_id')

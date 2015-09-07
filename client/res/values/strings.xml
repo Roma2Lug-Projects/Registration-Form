@@ -9,6 +9,7 @@
     <string name="text_currentID">ID:</string>
     <string name="text_name">Name:</string>
     <string name="text_lastname">Last Name:</string>
+    <string name="text_tshirt">Tshirt:</string>
     <string name="text_email">Email:</string>
     <string name="text_morning">Morning:</string>
     <string name="text_afternoon">Afternoon:</string>
